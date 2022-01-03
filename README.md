@@ -1,5 +1,5 @@
 # VRSuspender
-Suspend Process that interfere with SteamVR
+Suspend / Kill Process that interfere with SteamVR
 
 Work in progress. 
 
