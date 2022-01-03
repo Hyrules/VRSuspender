@@ -23,15 +23,31 @@ namespace VRSuspender
         private ObservableCollection<string> _watchedProcess = new ObservableCollection<string>();
         private ObservableCollection<SuspendedProcess> _suspendedProcess;
         private SuspendedProcess _selectedSuspendedProcess;
-
+        private bool _isMonitoring;
         public MainFormViewModel()
         {
             _watchedProcess.Add("vrserver.exe");
             _suspendedProcess = new ObservableCollection<SuspendedProcess>();
             _suspendedProcess.Add(new SuspendedProcess("iCUE"));
             _suspendedProcess.Add(new SuspendedProcess("EK-Connect"));
-            _suspendedProcess.Add(new SuspendedProcess("SamsungMagician"));
+            _suspendedProcess.Add(new SuspendedProcess("SamsungMagician", ProcessState.Unknown, "", ProcessAction.Kill));
             _suspendedProcess.Add(new SuspendedProcess("msedge"));
+            _isMonitoring = false;
+
+            foreach(SuspendedProcess sp in _suspendedProcess)
+            {
+                Process[] p = Process.GetProcessesByName(sp.Name);
+                if(p.Length > 0)
+                {
+
+                    sp.Status = p[0].Threads[0].WaitReason == ThreadWaitReason.Suspended ? ProcessState.Suspended : ProcessState.Running;
+                    sp.Path = p[0].MainModule.FileName;
+                }
+                else
+                {
+                    sp.Status = ProcessState.NotFound;
+                }
+            }
         }
 
         public void StartMonitoring()
@@ -42,6 +58,8 @@ namespace VRSuspender
             stopWatch.EventArrived += new EventArrivedEventHandler(stopWatch_EventArrived);
             stopWatch.Start();
 
+            _isMonitoring = true;
+
             WriteToLog("Waiting for SteamVR to start...");
         }
 
@@ -49,6 +67,9 @@ namespace VRSuspender
         {
             stopWatch.Stop();
             startWatch.Stop();
+
+            _isMonitoring = false;
+            WriteToLog("Stopping monitoring of SteamVR.");
         }
 
         #region EVENTS
@@ -58,23 +79,48 @@ namespace VRSuspender
 
             foreach (SuspendedProcess s in _suspendedProcess)
             {
-                Process[] p = Process.GetProcessesByName(s.Name);
-                if (p.Length > 0)
+                switch (s.Action)
                 {
-                    foreach(Process p2 in p)
-                    {
-                        p2.Resume();
+                    case ProcessAction.Suspend:
+                        ResumeProcess(s);
+                        break;
+                    case ProcessAction.Kill:
+                        RestartProcess(s);
+                        break;
+                    case ProcessAction.KeepRunning:
                         s.Status = ProcessState.Running;
+                        break;
+                    default:
+                        break;
 
-                        WriteToLog($"Resuming {p[0].ProcessName}");
-                    }
                 }
-                else
-                {
-                    s.Status = ProcessState.NotFound;
-                }
+                                            
             }
 
+        }
+
+        private void ResumeProcess(SuspendedProcess process)
+        {
+            
+            Process[] p = Process.GetProcessesByName(process.Name);
+            if (p.Length > 0)
+            {
+                foreach (Process p2 in p)
+                {
+                    WriteToLog($"Resuming {p2.ProcessName}");
+                    p2.Resume();
+                    process.Status = ProcessState.Running;
+                }
+            }
+        }
+
+        private void RestartProcess(SuspendedProcess process)
+        {
+            if (string.IsNullOrEmpty(process.Path)) return;
+            WriteToLog($"Starting {process.Name}");
+            ProcessStartInfo info = new ProcessStartInfo(process.Path);
+            info.WindowStyle = ProcessWindowStyle.Minimized;
+            Process newProcess = Process.Start(info);
         }
 
         void startWatch_EventArrived(object sender, EventArrivedEventArgs e)
@@ -82,32 +128,93 @@ namespace VRSuspender
             WriteToLog(e.NewEvent.Properties["ProcessName"].Value + " Started.");            
    
             foreach(SuspendedProcess s in _suspendedProcess)
-            {
-                Process[] p = Process.GetProcessesByName(s.Name);
-                if(p.Length > 0)
+            {    
+                switch (s.Action)
                 {
-                    foreach (Process p2 in p)
-                    {
-                        p2.Suspend();
-                        s.Status = ProcessState.Suspended;
-                        s.Path = p2.MainModule.FileName;
-                        WriteToLog($"Suspending {p2.ProcessName}");
-                    }
-
+                    case ProcessAction.Suspend:
+                        SuspendProcess(s);
+                        break;
+                    case ProcessAction.Close:
+                        CloseProcess(s);
+                        break;
+                    case ProcessAction.Kill:
+                        KillProcess(s);
+                        break;
+                    case ProcessAction.KeepRunning:
+                        s.Status = ProcessState.Running;
+                        break;
+                    default:
+                        break;
                 }
-                else
+
+            }
+                     
+        }
+        private void KillProcess(SuspendedProcess process)
+        {
+            Process[] p = Process.GetProcessesByName(process.Name);
+            if (p.Length > 0)
+            {
+                foreach (Process p2 in p)
                 {
-                    s.Status = ProcessState.NotFound;
+                    WriteToLog($"Terminating {p2.ProcessName}");
+                    p2.Kill(true);
+                    p2.Close();
                 }
             }
-            
-            
+        }
+
+        private void SuspendProcess(SuspendedProcess process)
+        {
+            Process[] p = Process.GetProcessesByName(process.Name);
+            if (p.Length > 0)
+            {
+                foreach (Process p2 in p)
+                {
+                    if (p2.HasExited) continue;
+                    WriteToLog($"Suspending {p2.ProcessName}");
+                    p2.Suspend();
+                    process.Status = ProcessState.Suspended;
+                }
+
+            }
+
+  
+        }
+
+        private void CloseProcess(SuspendedProcess process)
+        {
+            Process[] p = Process.GetProcessesByName(process.Name);
+            if (p.Length > 0)
+            {
+                foreach (Process p2 in p)
+                {
+                    WriteToLog($"Closing {p2.ProcessName}");
+                    p2.CloseMainWindow();
+                    p2.Close();
+                    process.Status = ProcessState.Stopped;
+                }
+            }
         }
 
         #region COMMANDS
 
         public ICommand EditCommand => new AsyncRelayCommand(param => EditSuspendedProcess(), param => CanEditSuspendedProcess());
-        public ICommand DelteCommand => new AsyncRelayCommand(param => DeleteSuspendedProcess(), param => CanDeleteSuspendedProcess());
+        public ICommand DeleteCommand => new AsyncRelayCommand(param => DeleteSuspendedProcess(), param => CanDeleteSuspendedProcess());
+        public ICommand StartMonitoringCommand => new RelayCommand(param => StartMonitoring(), param => _isMonitoring == false);
+        public ICommand StopMonitoringCommand => new RelayCommand(param => StopMonitoring(), param => _isMonitoring == true);
+        public ICommand ResumeProcessCommand => new RelayCommand(param => ResumeProcess(SelectedSuspendedProcess), param => CanResumeProcess());
+        public ICommand SuspendProcessCommand => new RelayCommand(param => SuspendProcess(SelectedSuspendedProcess), param => CanSuspendedProcess());
+
+        private bool CanSuspendedProcess()
+        {
+            return _selectedSuspendedProcess != null && _selectedSuspendedProcess.Status == ProcessState.Running;
+        }
+
+        private bool CanResumeProcess()
+        {
+            return _selectedSuspendedProcess != null && _selectedSuspendedProcess.Status == ProcessState.Suspended;
+        }
 
         private bool CanDeleteSuspendedProcess()
         {

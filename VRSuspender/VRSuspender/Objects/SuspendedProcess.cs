@@ -6,7 +6,7 @@ using VRSuspender.Utils;
 namespace VRSuspender
 {
     public enum ProcessState { Running, Suspended, Stopped, Unknown, NotFound };
-    public enum ProcessAction { KeepRunning, Suspend, Kill };
+    public enum ProcessAction { KeepRunning, Suspend, Kill, Close };
 
     public class SuspendedProcess : ValidatableBindableBase
     {
