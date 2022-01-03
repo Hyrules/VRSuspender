@@ -1,0 +1,35 @@
+﻿<Window x:Class="VRSuspender.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VRSuspender"
+        mc:Ignorable="d"
+        Title="VR Suspender" Height="450" Width="800" ContentRendered="Window_ContentRendered" Closing="Window_Closing" WindowStartupLocation="CenterScreen">
+    <Window.DataContext>
+        <local:MainFormViewModel></local:MainFormViewModel>
+    </Window.DataContext>
+    <Grid>
+        <Menu Height="22" VerticalAlignment="Top">
+            <MenuItem Name="mnuFile" Header="File">
+                <MenuItem Name="mnuQuit" Header="Quit"></MenuItem>
+            </MenuItem>
+            <MenuItem Name="mnuHelp" Header="Help">
+
+            </MenuItem>
+        </Menu>
+        <ListBox Name="lbSuspendedProcess" ItemsSource="{Binding SupendedProcess}" Margin="0,126,0,0" Height="150" VerticalAlignment="Top"/>
+        <ListBox Name="lbLog" ItemsSource="{Binding Log, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" Margin="0,276,0,0" ScrollViewer.CanContentScroll="True">
+            <!--            <ListBox.ItemTemplate>
+                <DataTemplate></DataTemplate>
+            </ListBox.ItemTemplate>-->
+        </ListBox>
+        <ListView d:ItemsSource="{Binding SupendedProcess}" Margin="0,0,0,309">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</Window>
