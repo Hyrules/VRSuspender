@@ -10,26 +10,56 @@
         <local:MainFormViewModel></local:MainFormViewModel>
     </Window.DataContext>
     <Grid>
-        <Menu Height="22" VerticalAlignment="Top">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="22"></RowDefinition>
+            <RowDefinition Height="32"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="100"></RowDefinition>
+            <RowDefinition Height="22"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Menu Height="22" VerticalAlignment="Top" Grid.Row="0">
             <MenuItem Name="mnuFile" Header="File">
                 <MenuItem Name="mnuQuit" Header="Quit"></MenuItem>
+            </MenuItem>
+            <MenuItem Name="mneOptions" Header="Options">
+                <MenuItem Name="nmuStartWithWindows" Header="Start with Windows"></MenuItem>
             </MenuItem>
             <MenuItem Name="mnuHelp" Header="Help">
 
             </MenuItem>
         </Menu>
-        <ListBox Name="lbSuspendedProcess" ItemsSource="{Binding SupendedProcess}" Margin="0,126,0,0" Height="150" VerticalAlignment="Top"/>
-        <ListBox Name="lbLog" ItemsSource="{Binding Log, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" Margin="0,276,0,0" ScrollViewer.CanContentScroll="True">
-            <!--            <ListBox.ItemTemplate>
-                <DataTemplate></DataTemplate>
-            </ListBox.ItemTemplate>-->
+
+        <ListBox Name="lbLog" ItemsSource="{Binding Log, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" ScrollViewer.CanContentScroll="True" Grid.Row="3">
         </ListBox>
-        <ListView d:ItemsSource="{Binding SupendedProcess}" Margin="0,0,0,309">
+        <ListView ItemsSource="{Binding SuspendedProcess, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" SelectedItem="{Binding SelectedSuspendedProcess}"  Grid.Row="2">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Edit..." Command="{Binding EditCommand}"></MenuItem>
+                    <Separator></Separator>
+                    <MenuItem Header="Delete" Command="{Binding DeleteCommand}"></MenuItem>
+                </ContextMenu>
+            </ListView.ContextMenu>
             <ListView.View>
                 <GridView>
-                    <GridViewColumn/>
+                    <GridViewColumn Header="Process Name" DisplayMemberBinding="{Binding Name}" Width="150" />
+                    <GridViewColumn Header="Status" DisplayMemberBinding="{Binding Status}" Width="100"/>
+                    <GridViewColumn Header="Action" DisplayMemberBinding="{Binding Action}" Width="100"/>
+                    <GridViewColumn Header="Path" DisplayMemberBinding="{Binding Path}" Width="Auto"/>
                 </GridView>
             </ListView.View>
         </ListView>
+        <StatusBar Grid.Row="4">
+
+        </StatusBar>
+        <ToolBarTray Height="32" Grid.Row="1" VerticalAlignment="Center" >
+            <ToolBar Height="32">
+                <Button Height="32" Content="Start" ToolTip="Start Monitoring for SteamVR"/>
+                <Button Height="32" Content="Stop" ToolTip="Stop Monitoring for SteamVR"/>
+                <Separator/>
+                <Button Height="32" Content="Edit..."/>
+                <Button Height="32" Content="Delete"/>
+            </ToolBar>
+        </ToolBarTray>
     </Grid>
 </Window>
