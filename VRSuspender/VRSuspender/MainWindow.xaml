@@ -24,6 +24,7 @@
             </MenuItem>
             <MenuItem Name="mneOptions" Header="Options">
                 <MenuItem Name="nmuStartWithWindows" Header="Start with Windows"></MenuItem>
+                <MenuItem Name="mntStartMonitorOnStartup" Header="Start monitoring on startup"></MenuItem>
             </MenuItem>
             <MenuItem Name="mnuHelp" Header="Help">
 
@@ -35,19 +36,32 @@
         <ListView ItemsSource="{Binding SuspendedProcess, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" SelectedItem="{Binding SelectedSuspendedProcess}"  Grid.Row="2">
             <ListView.ContextMenu>
                 <ContextMenu>
-                    
-                    <MenuItem Header="Edit..." Command="{Binding EditCommand}"></MenuItem>
+
+                    <MenuItem Header="Edit..." Command="{Binding EditCommand}"/>
                     <Separator></Separator>
-                    <MenuItem Header="Suspend" Command="{Binding SuspendProcessCommand}"></MenuItem>
-                    <MenuItem Header="Resume" Command="{Binding ResumeProcessCommand}"></MenuItem>
-                    
-                    <Separator></Separator>
-                    <MenuItem Header="Delete" Command="{Binding DeleteCommand}"></MenuItem>
+                    <MenuItem Header="Suspend" Command="{Binding SuspendProcessCommand}"/>
+                    <MenuItem Header="Resume" Command="{Binding ResumeProcessCommand}"/>
+                    <MenuItem Header="Kill" Command="{Binding KillProcessCommand}"/>
+                    <Separator/>
+                    <MenuItem Header="Refresh" Command="{Binding RefreshProcessCommand}"/>
+                    <MenuItem Header="Refresh all" Command="{Binding RefreshAllProcessCommand}"/>
+                    <Separator/>
+                    <MenuItem Header="Delete" Command="{Binding DeleteProcessCommand}"/>
                 </ContextMenu>
             </ListView.ContextMenu>
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="Process Name" DisplayMemberBinding="{Binding Name}" Width="150" />
+                    <GridViewColumn Header="Process Name" Width="150">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <WrapPanel>
+                                    <Image Height="16" Source="{Binding Icon}"></Image>
+                                    <TextBlock Text=" "/>
+                                    <TextBlock Text="{Binding Name}"/>
+                                </WrapPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                     <GridViewColumn Header="Status" DisplayMemberBinding="{Binding Status}" Width="100"/>
                     <GridViewColumn Header="Action" DisplayMemberBinding="{Binding Action}" Width="100"/>
                     <GridViewColumn Header="Path" DisplayMemberBinding="{Binding Path}" Width="400"/>
@@ -59,8 +73,12 @@
         </StatusBar>
         <ToolBarTray Height="32" Grid.Row="1" VerticalAlignment="Center" >
             <ToolBar Height="32">
-                <Button Height="32" Content="Start" ToolTip="Start Monitoring for SteamVR"/>
-                <Button Height="32" Content="Stop" ToolTip="Stop Monitoring for SteamVR"/>
+                <Button Height="32"  ToolTip="Start Monitoring for SteamVR" Command="{Binding StartMonitoringCommand}">
+                    <Image Height="24" Source="/Resources/play.png"></Image>
+                </Button>
+                <Button Height="32" ToolTip="Stop Monitoring for SteamVR" Command="{Binding StopMonitoringCommand}">
+                    <Image Height="24" Source="/Resources/stop.png"></Image>
+                </Button>
                 <Separator/>
                 <Button Height="32" Content="Edit..."/>
                 <Button Height="32" Content="Delete"/>

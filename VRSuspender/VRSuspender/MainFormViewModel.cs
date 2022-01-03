@@ -12,6 +12,10 @@ using System.IO;
 using VRSuspender.Extensions;
 using System.Windows.Input;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
+using System.Drawing;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace VRSuspender
 {
@@ -27,29 +31,17 @@ namespace VRSuspender
         public MainFormViewModel()
         {
             _watchedProcess.Add("vrserver.exe");
-            _suspendedProcess = new ObservableCollection<SuspendedProcess>();
-            _suspendedProcess.Add(new SuspendedProcess("iCUE"));
-            _suspendedProcess.Add(new SuspendedProcess("EK-Connect"));
-            _suspendedProcess.Add(new SuspendedProcess("SamsungMagician", ProcessState.Unknown, "", ProcessAction.Kill));
-            _suspendedProcess.Add(new SuspendedProcess("msedge"));
-            _isMonitoring = false;
-
-            foreach(SuspendedProcess sp in _suspendedProcess)
+            _suspendedProcess = new ObservableCollection<SuspendedProcess>
             {
-                Process[] p = Process.GetProcessesByName(sp.Name);
-                if(p.Length > 0)
-                {
-
-                    sp.Status = p[0].Threads[0].WaitReason == ThreadWaitReason.Suspended ? ProcessState.Suspended : ProcessState.Running;
-                    sp.Path = p[0].MainModule.FileName;
-                }
-                else
-                {
-                    sp.Status = ProcessState.NotFound;
-                }
-            }
+                new SuspendedProcess("iCUE"),
+                new SuspendedProcess("EK-Connect"),
+                new SuspendedProcess("SamsungMagician"),
+                new SuspendedProcess("msedge")
+            };
+            _isMonitoring = false;
+            RefreshProcess();
         }
-
+       
         public void StartMonitoring()
         {
             startWatch.EventArrived += new EventArrivedEventHandler(startWatch_EventArrived);
@@ -123,6 +115,38 @@ namespace VRSuspender
             Process newProcess = Process.Start(info);
         }
 
+        private void RefreshProcess(SuspendedProcess process)
+        {
+            Process[] p = Process.GetProcessesByName(process.Name);
+            if (p.Length > 0)
+            {
+                try
+                {
+                    process.Icon = Icon.ExtractAssociatedIcon(p[0].MainModule.FileName).ToImageSource();
+                }
+                catch (Exception)
+                {
+                    process.Icon = new BitmapImage(new Uri("pack://application:,,,/Resources/qm.png"));
+                }
+                process.Status = p[0].Threads[0].WaitReason == ThreadWaitReason.Suspended ? ProcessState.Suspended : ProcessState.Running;
+                process.Path = p[0].MainModule.FileName;
+            }
+            else
+            {
+                process.Icon = new BitmapImage(new Uri("pack://application:,,,/Resources/del.png"));
+                process.Status = ProcessState.NotFound;
+            }
+        }
+
+        private void RefreshProcess()
+        {
+            foreach (SuspendedProcess process in _suspendedProcess)
+            {
+                RefreshProcess(process);
+            }
+        }
+
+
         void startWatch_EventArrived(object sender, EventArrivedEventArgs e)
         {
             WriteToLog(e.NewEvent.Properties["ProcessName"].Value + " Started.");            
@@ -133,9 +157,6 @@ namespace VRSuspender
                 {
                     case ProcessAction.Suspend:
                         SuspendProcess(s);
-                        break;
-                    case ProcessAction.Close:
-                        CloseProcess(s);
                         break;
                     case ProcessAction.Kill:
                         KillProcess(s);
@@ -152,6 +173,7 @@ namespace VRSuspender
         }
         private void KillProcess(SuspendedProcess process)
         {
+            if (MessageBox.Show($"Are you sure you want to kill {process.Name} ?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No) return;
             Process[] p = Process.GetProcessesByName(process.Name);
             if (p.Length > 0)
             {
@@ -179,22 +201,6 @@ namespace VRSuspender
 
             }
 
-  
-        }
-
-        private void CloseProcess(SuspendedProcess process)
-        {
-            Process[] p = Process.GetProcessesByName(process.Name);
-            if (p.Length > 0)
-            {
-                foreach (Process p2 in p)
-                {
-                    WriteToLog($"Closing {p2.ProcessName}");
-                    p2.CloseMainWindow();
-                    p2.Close();
-                    process.Status = ProcessState.Stopped;
-                }
-            }
         }
 
         #region COMMANDS
@@ -205,6 +211,19 @@ namespace VRSuspender
         public ICommand StopMonitoringCommand => new RelayCommand(param => StopMonitoring(), param => _isMonitoring == true);
         public ICommand ResumeProcessCommand => new RelayCommand(param => ResumeProcess(SelectedSuspendedProcess), param => CanResumeProcess());
         public ICommand SuspendProcessCommand => new RelayCommand(param => SuspendProcess(SelectedSuspendedProcess), param => CanSuspendedProcess());
+        public ICommand KillProcessCommand => new RelayCommand(param => KillProcess(SelectedSuspendedProcess), param => CanKillProcess());
+        public ICommand RefreshProcessCommand => new RelayCommand(param => RefreshProcess(SelectedSuspendedProcess), param => CanRefreshProcess());
+        public ICommand RefreshAllProcessCommand => new RelayCommand(param => RefreshProcess());
+
+        private bool CanRefreshProcess()
+        {
+            return _selectedSuspendedProcess != null;
+        }
+
+        private bool CanKillProcess()
+        {
+            return _selectedSuspendedProcess != null && (_selectedSuspendedProcess.Status == ProcessState.Running || _selectedSuspendedProcess.Status == ProcessState.Suspended);
+        }
 
         private bool CanSuspendedProcess()
         {
@@ -240,7 +259,7 @@ namespace VRSuspender
 
         private void WriteToLog(string message)
         {
-            Application.Current.Dispatcher.BeginInvoke(new Action(() => Log.Add($"[{DateTime.Now}] - {message}.")));
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => Log.Insert(0,$"[{DateTime.Now}] - {message}.")));
         }
 
         #endregion

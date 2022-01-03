@@ -1,21 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
+using System.Windows.Media;
 using VRSuspender.Utils;
 
 namespace VRSuspender
 {
     public enum ProcessState { Running, Suspended, Stopped, Unknown, NotFound };
-    public enum ProcessAction { KeepRunning, Suspend, Kill, Close };
+    public enum ProcessAction { KeepRunning, Suspend, Kill };
 
     public class SuspendedProcess : ValidatableBindableBase
     {
 
 
-        string _name;
-        ProcessState _status;
-        string _path;
-        ProcessAction _action;
+        private string _name;
+        private ProcessState _status;
+        private string _path;
+        private ProcessAction _action;
+        private ImageSource _icon;
 
         public SuspendedProcess()
         {
@@ -23,6 +26,7 @@ namespace VRSuspender
             _status = ProcessState.Unknown;
             _path = string.Empty;
             _action = ProcessAction.Suspend;
+            Icon = null;
         }
 
         public SuspendedProcess(string name) : this()
@@ -45,6 +49,12 @@ namespace VRSuspender
             Action = action;
         }
 
+        public SuspendedProcess(string name, ProcessAction action)
+        {
+            Name = name;
+            Action = action;
+            Path = string.Empty;
+        }
 
         public string Name 
         { 
@@ -66,6 +76,11 @@ namespace VRSuspender
         { 
             get => _action; 
             set => SetProperty(ref _action, value); 
+        }
+        public ImageSource Icon 
+        { 
+            get => _icon; 
+            set => SetProperty(ref _icon,value); 
         }
     }
 }

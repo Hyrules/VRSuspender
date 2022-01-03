@@ -21,7 +21,7 @@ namespace VRSuspender.Extensions
             IMPERSONATE = (0x0100),
             DIRECT_IMPERSONATION = (0x0200)
         }
-
+        
 
         [DllImport("kernel32.dll")]
         static extern IntPtr OpenThread(ThreadAccess dwDesiredAccess, bool bInheritHandle, uint dwThreadId);
@@ -54,5 +54,6 @@ namespace VRSuspender.Extensions
                 ResumeThread(pOpenThread);
             }
         }
+
     }
 }
