@@ -1,0 +1,9 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/VRSuspender/.vs/VRSuspender/DesignTimeBuild
+/VRSuspender/.vs/VRSuspender/v17
+/VRSuspender/.vs/VRSuspender
+/VRSuspender/VRSuspender/obj/Debug/netcoreapp3.1
+/VRSuspender/VRSuspender/obj
