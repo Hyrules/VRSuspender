@@ -14,7 +14,6 @@ You can either Suspend, Close, Kill the process.
 
 Actions : 
 
-- Close : Try to close the process gracefully but might not work if the app is programmed to go in the tray.
 - Kill : Kill the process and will try it's best to restart it afterward.
 - Suspend : Suspend the process. (you might see the window become greyed with at bar at the top and become unresponsive this is normal)
 
