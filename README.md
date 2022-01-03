@@ -1,12 +1,13 @@
 # VRSuspender
-Suspend / Kill Process that interfere with SteamVR
+Suspend / Kill Process that interfere with SteamVR. 
+
+Most of the time theses programs are softwares that control LED like motherboard or keyboard and mouse.
 
 Work in progress. 
 
 Require to run as administrator to modify the processes states.
 
-Automatically detect SteamVR (vrserver.exe) and suspend process like iCUE, msedge, SamsungMagician, EK-Connect that causes spikes in
-SteamVR.
+Automatically detect SteamVR (vrserver.exe) and suspend process that causes spikes in SteamVR. You will have to specify the programs you want to close and the application does not detect this automatically. Some known programs are already setup in the app but they might not all be there.
 
 Start this application and then start SteamVR. If you have any of theses process they will be suspended. They will automatically resume after you exit SteamVR.
 You can either Suspend, Close, Kill the process.
