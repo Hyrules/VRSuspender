@@ -15,7 +15,9 @@ Actions :
 
 - Close : Try to close the process gracefully but might not work if the app is programmed to go in the tray.
 - Kill : Kill the process and will try it's best to restart it afterward.
-- Suspend : Suspend the process. (you might see the window become greyed with at bar at the top)
+- Suspend : Suspend the process. (you might see the window become greyed with at bar at the top and become unresponsive this is normal)
+
+Note: If you suspend a process with this app you won't be able to resume it from the task manager.
 
 TODO:
 - Add button to manage process
