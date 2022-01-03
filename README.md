@@ -23,6 +23,7 @@ TODO:
 - Add button to manage process
 - Add option to save process list
 
+WARNING:
 I do not offer any kind of warranty with this app and user is solely responsible for using the application and situations that might arise.
-I will not be responsible if you crash your computer because you kill or suspended a process you shouldn't have.
+I will not be responsible if you crash your computer or someone else because you killed or suspended a process you shouldn't have.
 Make sure to investigate the processes before suspending or killing them.
