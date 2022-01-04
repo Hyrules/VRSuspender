@@ -1,0 +1,23 @@
+﻿<Window x:Class="VRSuspender.EditProcessForm.EditTrackedProcessForm"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VRSuspender.EditProcessForm"
+        mc:Ignorable="d"
+        Title="Edit / Add A Process to Manage..." Height="203" Width="504" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow">
+    <Window.DataContext>
+        <local:EditSuspendedProcessFormViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <Label Content="Process Name" HorizontalAlignment="Left" Margin="17,18,0,0" VerticalAlignment="Top"/>
+        <TextBox HorizontalAlignment="Left" Margin="101,22,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="218"/>
+        <Button Content="Browse..." HorizontalAlignment="Left" Margin="324,21,0,0" VerticalAlignment="Top" Width="66" Command="{Binding BrowseExecutableCommand}"/>
+        <ComboBox HorizontalAlignment="Left" Margin="101,60,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="0">
+            <ComboBoxItem Content="Suspend"/>
+            <ComboBoxItem Content="Kill"/>
+        </ComboBox>
+        <Label Content="Action" HorizontalAlignment="Left" Margin="17,56,0,0" VerticalAlignment="Top"/>
+
+    </Grid>
+</Window>

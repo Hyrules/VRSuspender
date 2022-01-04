@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Windows.Media;
 using VRSuspender.Utils;
 
@@ -10,7 +11,7 @@ namespace VRSuspender
     public enum ProcessState { Running, Suspended, Stopped, Unknown, NotFound };
     public enum ProcessAction { KeepRunning, Suspend, Kill };
 
-    public class SuspendedProcess : ValidatableBindableBase
+    public class TrackedProcess : ValidatableBindableBase
     {
 
 
@@ -20,7 +21,7 @@ namespace VRSuspender
         private ProcessAction _action;
         private ImageSource _icon;
 
-        public SuspendedProcess()
+        public TrackedProcess()
         {
             _name = string.Empty;
             _status = ProcessState.Unknown;
@@ -29,27 +30,27 @@ namespace VRSuspender
             Icon = null;
         }
 
-        public SuspendedProcess(string name) : this()
+        public TrackedProcess(string name) : this()
         {         
             Name = name;
         }
 
-        public SuspendedProcess(string name, ProcessState status) :this(name)
+        public TrackedProcess(string name, ProcessState status) :this(name)
         {            
             Status = status;
         }
 
-        public SuspendedProcess(string name, ProcessState status, string path) : this(name,status)
+        public TrackedProcess(string name, ProcessState status, string path) : this(name,status)
         {
             Path = path;
         }
 
-        public SuspendedProcess(string name, ProcessState status, string path, ProcessAction action) : this(name,status,path)
+        public TrackedProcess(string name, ProcessState status, string path, ProcessAction action) : this(name,status,path)
         {
             Action = action;
         }
 
-        public SuspendedProcess(string name, ProcessAction action)
+        public TrackedProcess(string name, ProcessAction action)
         {
             Name = name;
             Action = action;
@@ -77,6 +78,8 @@ namespace VRSuspender
             get => _action; 
             set => SetProperty(ref _action, value); 
         }
+        
+        [JsonIgnore]
         public ImageSource Icon 
         { 
             get => _icon; 

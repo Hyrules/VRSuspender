@@ -33,7 +33,7 @@
 
         <ListBox Name="lbLog" ItemsSource="{Binding Log, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" ScrollViewer.CanContentScroll="True" Grid.Row="3">
         </ListBox>
-        <ListView ItemsSource="{Binding SuspendedProcess, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" SelectedItem="{Binding SelectedSuspendedProcess}"  Grid.Row="2">
+        <ListView ItemsSource="{Binding TrackedProcess, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" SelectedItem="{Binding SelectedTrackedProcess}"  Grid.Row="2">
             <ListView.ContextMenu>
                 <ContextMenu>
 
@@ -80,7 +80,7 @@
                     <Image Height="24" Source="/Resources/stop.png"></Image>
                 </Button>
                 <Separator/>
-                <Button Height="32" Content="Edit..."/>
+                <Button Height="32" Content="Edit..." Command="{Binding EditProcessCommand}"/>
                 <Button Height="32" Content="Delete"/>
             </ToolBar>
         </ToolBarTray>
