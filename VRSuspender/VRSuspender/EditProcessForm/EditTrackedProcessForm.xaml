@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Edit / Add A Process to Manage..." Height="203" Width="504" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow">
     <Window.DataContext>
-        <local:EditSuspendedProcessFormViewModel/>
+        <local:EditTrackedProcessFormViewModel/>
     </Window.DataContext>
     <Grid>
         <Label Content="Process Name" HorizontalAlignment="Left" Margin="17,18,0,0" VerticalAlignment="Top"/>
