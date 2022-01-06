@@ -3,6 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:h="http://www.hardcodet.net/taskbar"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:local="clr-namespace:VRSuspender"
         mc:Ignorable="d"
         Title="VR Suspender" Height="450" Width="800" ContentRendered="Window_ContentRendered" Closing="Window_Closing" WindowStartupLocation="CenterScreen">
@@ -14,6 +16,12 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <ContextMenu x:Key="NotifyIconMenu">
+            <MenuItem Name="mnuNIStartMonitoring" Header="Start Monitoring" Command="{Binding StartMonitoringCommand}"/>
+            <MenuItem Name="mnuNIStopMonitoring" Header="Stop Monitoring" Command="{Binding StopMonitoringCommand}"/>
+            <Separator/>
+            <MenuItem Name="mnuNIQuit" Header="Quit" Click="mnuNIQuit_Click"/>
+        </ContextMenu>
     </Window.Resources>
     <Window.DataContext>
         <local:MainFormViewModel></local:MainFormViewModel>
@@ -26,15 +34,33 @@
             <RowDefinition Height="100"></RowDefinition>
             <RowDefinition Height="22"></RowDefinition>
         </Grid.RowDefinitions>
+        <h:TaskbarIcon Name="NotifyIcon" IconSource="/icon.ico" DoubleClickCommand="{Binding NotificationIconDoubleClickCommand}" Visibility="Visible" ToolTip="VR Suspender" ContextMenu="{StaticResource NotifyIconMenu}">
+
+        </h:TaskbarIcon>
+
 
         <Menu Height="22" VerticalAlignment="Top" Grid.Row="0">
             <MenuItem Name="mnuFile" Header="File">
                 <MenuItem Name="mnuQuit" Header="Quit"></MenuItem>
             </MenuItem>
-            <MenuItem Name="mneOptions" Header="Options">
-                <MenuItem Name="nmuStartWithWindows" Header="Start with Windows" IsCheckable="True" IsChecked="{Binding StartWithWindows}" Command="{Binding SaveSettingsCommand}"/>
-                <MenuItem Name="mntStartMonitorOnStartup" Header="Start monitoring on startup" IsCheckable="True" IsChecked="{Binding StartMonitoringOnStartup}" Command="{Binding SaveSettingsCommand}"/>
-                <MenuItem Name="mnuStartMinimized" Header="Start Minimized" IsCheckable="True" IsChecked="{Binding StartMinimized}" Command="{Binding SaveSettingsCommand}"/>
+            <MenuItem Name="mnuOptions" Header="Options">
+                <ComboBox SelectedIndex="{Binding StartState}" Width="150">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SelectionChanged">
+                            <i:InvokeCommandAction Command="{Binding SaveSettingsCommand}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <ComboBoxItem Content="Start Normally"/>
+                    <ComboBoxItem Content="Start Minimized"/>
+                    <ComboBoxItem Content="Start Maximized"/>
+                    <ComboBoxItem Content="Start to tray"/>
+                </ComboBox>
+                <MenuItem Name="nmuStartWithWindows" Header="Start with Windows" IsCheckable="True" IsChecked="{Binding StartWithWindows}" Command="{Binding SaveSettingsCommand}">
+
+                </MenuItem>
+                <MenuItem Name="mntStartMonitorOnStartup" Header="Start monitoring on startup" IsCheckable="True" IsChecked="{Binding StartMonitoringOnStartup}" Command="{Binding SaveSettingsCommand}">
+
+                </MenuItem>
             </MenuItem>
             <MenuItem Name="mnuHelp" Header="Help">
 
@@ -43,7 +69,7 @@
 
         <ListBox Name="lbLog" ItemsSource="{Binding Log, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" ScrollViewer.CanContentScroll="True" Grid.Row="3">
         </ListBox>
-        <ListView ItemsSource="{Binding TrackedProcess, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" SelectedItem="{Binding SelectedTrackedProcess}"  Grid.Row="2">
+        <ListView ItemsSource="{Binding ListTrackedProcess, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" SelectedItem="{Binding SelectedTrackedProcess}"  Grid.Row="2">
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Edit..." Command="{Binding EditCommand}"/>
@@ -88,7 +114,6 @@
                 <Button Height="32" ToolTip="Stop Monitoring for SteamVR" Command="{Binding StopMonitoringCommand}">
                     <Image Height="24" Source="/Resources/stop.png" Style="{StaticResource ImageEnabled}"></Image>
                 </Button>
-                
                 <Separator/>
                 <Button Height="32" ToolTip="Add Tracked Process" Command="{Binding AddProcessCommand}">
                     <Image Height="20" Source="/Resources/add.png" Style="{StaticResource ImageEnabled}"></Image>
@@ -105,11 +130,10 @@
                 </Button>
                 <Button Height="32" ToolTip="Resume Process" Command="{Binding ResumeProcessCommand}">
                     <Image Height="24" Source="/Resources/resume.png" Stretch="Fill" Style="{StaticResource ImageEnabled}"></Image>
-                </Button>                
+                </Button>
                 <Button Height="32" ToolTip="Kill Process" Command="{Binding KillProcessCommand}">
                     <Image Height="24" Source="/Resources/kill.png" Style="{StaticResource ImageEnabled}"></Image>
                 </Button>
-
                 <Separator/>
                 <Button Height="32" ToolTip="Refresh Process" Command="{Binding RefreshProcessCommand}">
                     <Image Height="18" Source="/Resources/refresh.png" Style="{StaticResource ImageEnabled}"></Image>
@@ -117,6 +141,18 @@
                 <Button Height="32" ToolTip="Refresh All Process" Command="{Binding RefreshAllProcessCommand}">
                     <Image Height="18" Source="/Resources/refresh_A.png" Style="{StaticResource ImageEnabled}"></Image>
                 </Button>
+                <Separator/>
+                <ComboBox Name="cbFilter" Width="120" SelectedIndex="{Binding SelectedFilter}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Changed">
+                            <i:InvokeCommandAction Command="{Binding FilterMainViewCommand}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <ComboBoxItem Content="All" />
+                    <ComboBoxItem Content="Suspended"/>
+                    <ComboBoxItem Content="Running"/>
+                    <ComboBoxItem Content="Stopped"/>
+                </ComboBox>
             </ToolBar>
         </ToolBarTray>
     </Grid>

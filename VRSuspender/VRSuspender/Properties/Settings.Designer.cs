@@ -25,25 +25,13 @@ namespace VRSuspender.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool StartWithWindows {
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public uint StartState {
             get {
-                return ((bool)(this["StartWithWindows"]));
+                return ((uint)(this["StartState"]));
             }
             set {
-                this["StartWithWindows"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool StartMinimized {
-            get {
-                return ((bool)(this["StartMinimized"]));
-            }
-            set {
-                this["StartMinimized"] = value;
+                this["StartState"] = value;
             }
         }
         

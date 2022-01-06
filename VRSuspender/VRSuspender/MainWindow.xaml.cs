@@ -14,7 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Diagnostics;
 using VRSuspender.Extensions;
-
+using Hardcodet.Wpf;
 
 namespace VRSuspender
 {
@@ -34,14 +34,23 @@ namespace VRSuspender
 
         private void Window_ContentRendered(object sender, EventArgs e)
         {
-            _mfvm.StartMonitoring();
+            if(Properties.Settings.Default.StartMonitorOnStartup)
+                _mfvm.StartMonitoring();
           
             
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            if(_mfvm.IsMonitoring)
+                _mfvm.StopMonitoring();
+        }
+
+ 
+        private void mnuNIQuit_Click(object sender, RoutedEventArgs e)
+        {
             _mfvm.StopMonitoring();
+            Close();
         }
     }
 }

@@ -26,27 +26,28 @@ namespace VRSuspender
         private ObservableCollection<string> _log = new ObservableCollection<string>();
         private ManagementEventWatcher startWatch = new ManagementEventWatcher(new WqlEventQuery("SELECT * FROM Win32_ProcessStartTrace WHERE ProcessName = 'vrmonitor.exe'"));
         private ManagementEventWatcher stopWatch = new ManagementEventWatcher(new WqlEventQuery("SELECT * FROM Win32_ProcessStopTrace WHERE ProcessName = 'vrmonitor.exe'"));
-        private ObservableCollection<string> _watchedProcess = new ObservableCollection<string>();
-        private ObservableCollection<TrackedProcess> _trackedProcess;
+        private ObservableCollection<string> _listWatchedProcess = new ObservableCollection<string>();
+        private ObservableCollection<TrackedProcess> _listTrackedProcess;
         private TrackedProcess _selectedTrackedProcess;
         private bool _isMonitoring;
-
-        private bool _startMinimized;
+        private uint _selectedFilterIndex;
         private bool _startWithWindows;
         private bool _startMonitoringOnStartup;
+        private uint _startState;
 
         public MainFormViewModel()
         {
             StartMonitoringOnStartup = Properties.Settings.Default.StartMonitorOnStartup;
-            StartMinimized = Properties.Settings.Default.StartMinimized;
-            StartWithWindows = Properties.Settings.Default.StartWithWindows;
+            StartState = Properties.Settings.Default.StartState;
             
 
-            _watchedProcess.Add("vrserver.exe");
-            _trackedProcess = new ObservableCollection<TrackedProcess>();
+            _listWatchedProcess.Add("vrserver.exe");
+            _listTrackedProcess = new ObservableCollection<TrackedProcess>();
             LoadTrackedProcessProfiles();
-            _isMonitoring = false;
+            IsMonitoring = false;
             RefreshProcess();
+
+
         }
        
         public void StartMonitoring()
@@ -57,7 +58,7 @@ namespace VRSuspender
             stopWatch.EventArrived += new EventArrivedEventHandler(stopWatch_EventArrived);
             stopWatch.Start();
 
-            _isMonitoring = true;
+            IsMonitoring = true;
             WriteToLog("Waiting for SteamVR to start...");
         }
 
@@ -66,7 +67,7 @@ namespace VRSuspender
             stopWatch.Stop();
             startWatch.Stop();
 
-            _isMonitoring = false;
+            IsMonitoring = false;
             WriteToLog("Stopped monitoring of SteamVR.");
         }
 
@@ -75,7 +76,7 @@ namespace VRSuspender
         {
             WriteToLog(e.NewEvent.Properties["ProcessName"].Value + " Stopped.");            
 
-            foreach (TrackedProcess s in _trackedProcess)
+            foreach (TrackedProcess s in _listTrackedProcess)
             {
                 switch (s.Action)
                 {
@@ -133,7 +134,7 @@ namespace VRSuspender
                     StreamReader sr = new StreamReader(profile);
                     string json = sr.ReadToEnd();
 
-                    TrackedProcess.Add(JsonConvert.DeserializeObject<TrackedProcess>(json));
+                    ListTrackedProcess.Add(JsonConvert.DeserializeObject<TrackedProcess>(json));
 
                 }
             }
@@ -173,7 +174,7 @@ namespace VRSuspender
 
         private void RefreshProcess()
         {
-            foreach (TrackedProcess process in _trackedProcess)
+            foreach (TrackedProcess process in _listTrackedProcess)
             {
                 RefreshProcess(process);
             }
@@ -184,7 +185,7 @@ namespace VRSuspender
         {
             WriteToLog(e.NewEvent.Properties["ProcessName"].Value + " Started.");            
    
-            foreach(TrackedProcess s in _trackedProcess)
+            foreach(TrackedProcess s in _listTrackedProcess)
             {    
                 switch (s.Action)
                 {
@@ -239,7 +240,7 @@ namespace VRSuspender
         #region COMMANDS
 
         public ICommand EditCommand => new RelayCommand(param => EditProcess(), param => CanEditSuspendedProcess());
-        public ICommand DeleteCommand => new AsyncRelayCommand(param => DeleteSuspendedProcess(), param => CanDeleteSuspendedProcess());
+        public ICommand DeleteCommand => new RelayCommand(param => DeleteSuspendedProcess(), param => CanDeleteSuspendedProcess());
         public ICommand StartMonitoringCommand => new RelayCommand(param => StartMonitoring(), param => CanStartMonitor());
         public ICommand StopMonitoringCommand => new RelayCommand(param => StopMonitoring(), param => CanStopMonitor());
         public ICommand ResumeProcessCommand => new RelayCommand(param => ResumeProcess(SelectedTrackedProcess), param => CanResumeProcess());
@@ -249,7 +250,23 @@ namespace VRSuspender
         public ICommand RefreshAllProcessCommand => new RelayCommand(param => RefreshProcess());
         public ICommand EditProcessCommand => new RelayCommand(param => EditProcess(), param => CanEditProcess());
         public ICommand AddProcessCommand => new RelayCommand(param => AddProces());
-        public ICommand SaveSettingsCommand => new RelayCommand(param => Properties.Settings.Default.Save());
+        public ICommand SaveSettingsCommand => new RelayCommand(param => SaveSettings());
+        public ICommand FilterMainViewCommand => new RelayCommand(param => FilterMainView());
+        public ICommand NotificationIconDoubleClickCommand => new RelayCommand(param => Application.Current.MainWindow.Show());
+
+        private void FilterMainView()
+        {
+            
+        }
+
+        private void SaveSettings()
+        {
+           
+            Properties.Settings.Default.StartState = StartState;
+            Properties.Settings.Default.StartMonitorOnStartup = StartMonitoringOnStartup;
+            Properties.Settings.Default.Save();
+
+        }
 
         private void AddProces()
         {
@@ -259,18 +276,18 @@ namespace VRSuspender
             {
                 TrackedProcess ntp = ProcessEditor.GetTrackedProcess();
                 RefreshProcess(ntp);
-                TrackedProcess.Add(ntp);
+                ListTrackedProcess.Add(ntp);
             }
         }
 
         private bool CanStartMonitor()
         {
-            return _isMonitoring == false;
+            return IsMonitoring == false;
         }
 
         private bool CanStopMonitor()
         {
-            return _isMonitoring == true;
+            return IsMonitoring == true;
         }
         private bool CanEditProcess()
         {
@@ -286,6 +303,7 @@ namespace VRSuspender
                 TrackedProcess process = ProcessEditor.GetTrackedProcess();
                 SelectedTrackedProcess.Name = process.Name;
                 SelectedTrackedProcess.Action = process.Action;
+                SelectedTrackedProcess.Path = process.Path;
             }
         }
 
@@ -314,16 +332,15 @@ namespace VRSuspender
             return SelectedTrackedProcess != null;
         }
 
-        private Task DeleteSuspendedProcess()
+        private void DeleteSuspendedProcess()
         {
-            return null;
+            ListTrackedProcess.Remove(SelectedTrackedProcess);
         }
 
         private bool CanEditSuspendedProcess()
         {
             return SelectedTrackedProcess != null;
         }
-
 
         #endregion
 
@@ -337,12 +354,14 @@ namespace VRSuspender
         #region PROPERTIES
 
         public ObservableCollection<string> Log { get => _log; private set => SetProperty(ref _log, value); }
-        public ObservableCollection<TrackedProcess> TrackedProcess { get => _trackedProcess; set => SetProperty(ref _trackedProcess,value); }
-        public int SuspendedProcessCount { get => _trackedProcess.Count; }
+        public ObservableCollection<TrackedProcess> ListTrackedProcess { get => _listTrackedProcess; set => SetProperty(ref _listTrackedProcess,value); }
+        public int SuspendedProcessCount { get => _listTrackedProcess.Count; }
         public TrackedProcess SelectedTrackedProcess { get => _selectedTrackedProcess; set => SetProperty(ref _selectedTrackedProcess,value);  }
-        public bool StartMinimized { get => _startMinimized; set => SetProperty(ref _startMinimized,value); }
         public bool StartWithWindows { get => _startWithWindows; set => SetProperty(ref _startWithWindows,value); }
         public bool StartMonitoringOnStartup { get => _startMonitoringOnStartup; set => SetProperty(ref _startMonitoringOnStartup,value); }
+        public uint SelectedFilterIndex { get => _selectedFilterIndex; set => SetProperty(ref _selectedFilterIndex,value); }
+        public bool IsMonitoring { get => _isMonitoring; set => SetProperty(ref _isMonitoring,value); }
+        public uint StartState { get => _startState; set => SetProperty(ref _startState,value); }
         #endregion
     }
 
