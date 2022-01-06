@@ -5,19 +5,24 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VRSuspender.EditProcessForm"
         mc:Ignorable="d"
-        Title="Edit / Add A Process to Manage..." Height="203" Width="504" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow">
+        Title="Edit / Add A Process to Track..." Height="203" Width="422" WindowStartupLocation="CenterOwner" WindowStyle="SingleBorderWindow">
     <Window.DataContext>
         <local:EditTrackedProcessFormViewModel/>
     </Window.DataContext>
     <Grid>
         <Label Content="Process Name" HorizontalAlignment="Left" Margin="17,18,0,0" VerticalAlignment="Top"/>
-        <TextBox HorizontalAlignment="Left" Margin="101,22,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="218"/>
+        <TextBox Name="tbName" HorizontalAlignment="Left" Margin="101,22,0,0" TextWrapping="Wrap" Text="{Binding Name}" VerticalAlignment="Top" Width="218"/>
         <Button Content="Browse..." HorizontalAlignment="Left" Margin="324,21,0,0" VerticalAlignment="Top" Width="66" Command="{Binding BrowseExecutableCommand}"/>
-        <ComboBox HorizontalAlignment="Left" Margin="101,60,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="0">
+        <ComboBox HorizontalAlignment="Left" Margin="101,66,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="{Binding Action}">
             <ComboBoxItem Content="Suspend"/>
             <ComboBoxItem Content="Kill"/>
+            <ComboBoxItem Content="Keep Running"/>
         </ComboBox>
-        <Label Content="Action" HorizontalAlignment="Left" Margin="17,56,0,0" VerticalAlignment="Top"/>
+        <Label Content="Action" HorizontalAlignment="Left" Margin="17,64,0,0" VerticalAlignment="Top"/>
+        <Button Name="btnSave" Content="Save" HorizontalAlignment="Left" Margin="290,123,0,0" VerticalAlignment="Top" Width="47" Click="btnSave_Click" />
+        <Button Name="btnCance" Content="Cancel" HorizontalAlignment="Left" Margin="342,123,0,0" VerticalAlignment="Top" Width="48" Click="btnCance_Click"/>
+        <Label Content="Process Path" HorizontalAlignment="Left" Margin="17,39,0,0" VerticalAlignment="Top"/>
+        <TextBox Name="tbPath" HorizontalAlignment="Left" Margin="101,43,0,0" TextWrapping="NoWrap" Text="{Binding Path}" IsReadOnly="True" VerticalAlignment="Top" Width="218"/>
 
     </Grid>
 </Window>

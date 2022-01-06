@@ -6,6 +6,15 @@
         xmlns:local="clr-namespace:VRSuspender"
         mc:Ignorable="d"
         Title="VR Suspender" Height="450" Width="800" ContentRendered="Window_ContentRendered" Closing="Window_Closing" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <Style x:Key="ImageEnabled" TargetType="Image">
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.25"></Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
     <Window.DataContext>
         <local:MainFormViewModel></local:MainFormViewModel>
     </Window.DataContext>
@@ -23,8 +32,9 @@
                 <MenuItem Name="mnuQuit" Header="Quit"></MenuItem>
             </MenuItem>
             <MenuItem Name="mneOptions" Header="Options">
-                <MenuItem Name="nmuStartWithWindows" Header="Start with Windows"></MenuItem>
-                <MenuItem Name="mntStartMonitorOnStartup" Header="Start monitoring on startup"></MenuItem>
+                <MenuItem Name="nmuStartWithWindows" Header="Start with Windows" IsCheckable="True" IsChecked="{Binding StartWithWindows}" Command="{Binding SaveSettingsCommand}"/>
+                <MenuItem Name="mntStartMonitorOnStartup" Header="Start monitoring on startup" IsCheckable="True" IsChecked="{Binding StartMonitoringOnStartup}" Command="{Binding SaveSettingsCommand}"/>
+                <MenuItem Name="mnuStartMinimized" Header="Start Minimized" IsCheckable="True" IsChecked="{Binding StartMinimized}" Command="{Binding SaveSettingsCommand}"/>
             </MenuItem>
             <MenuItem Name="mnuHelp" Header="Help">
 
@@ -36,7 +46,6 @@
         <ListView ItemsSource="{Binding TrackedProcess, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" SelectedItem="{Binding SelectedTrackedProcess}"  Grid.Row="2">
             <ListView.ContextMenu>
                 <ContextMenu>
-
                     <MenuItem Header="Edit..." Command="{Binding EditCommand}"/>
                     <Separator></Separator>
                     <MenuItem Header="Suspend" Command="{Binding SuspendProcessCommand}"/>
@@ -74,14 +83,40 @@
         <ToolBarTray Height="32" Grid.Row="1" VerticalAlignment="Center" >
             <ToolBar Height="32">
                 <Button Height="32"  ToolTip="Start Monitoring for SteamVR" Command="{Binding StartMonitoringCommand}">
-                    <Image Height="24" Source="/Resources/play.png"></Image>
+                    <Image Height="24" Source="/Resources/play.png" Style="{StaticResource ImageEnabled}"></Image>
                 </Button>
                 <Button Height="32" ToolTip="Stop Monitoring for SteamVR" Command="{Binding StopMonitoringCommand}">
-                    <Image Height="24" Source="/Resources/stop.png"></Image>
+                    <Image Height="24" Source="/Resources/stop.png" Style="{StaticResource ImageEnabled}"></Image>
+                </Button>
+                
+                <Separator/>
+                <Button Height="32" ToolTip="Add Tracked Process" Command="{Binding AddProcessCommand}">
+                    <Image Height="20" Source="/Resources/add.png" Style="{StaticResource ImageEnabled}"></Image>
+                </Button>
+                <Button Height="32" ToolTip="Edit Tracked Process" Command="{Binding EditProcessCommand}">
+                    <Image Height="15" Source="/Resources/edit.png" Style="{StaticResource ImageEnabled}"></Image>
+                </Button>
+                <Button Height="32" ToolTip="Delete Tracked Process" Command="{Binding DeleteCommand}">
+                    <Image Height="24" Source="/Resources/del.png" Style="{StaticResource ImageEnabled}"></Image>
                 </Button>
                 <Separator/>
-                <Button Height="32" Content="Edit..." Command="{Binding EditProcessCommand}"/>
-                <Button Height="32" Content="Delete"/>
+                <Button Height="32" ToolTip="Suspend Process" Command="{Binding SuspendProcessCommand}">
+                    <Image Height="24" Source="/Resources/suspend.png" Style="{StaticResource ImageEnabled}"></Image>
+                </Button>
+                <Button Height="32" ToolTip="Resume Process" Command="{Binding ResumeProcessCommand}">
+                    <Image Height="24" Source="/Resources/resume.png" Stretch="Fill" Style="{StaticResource ImageEnabled}"></Image>
+                </Button>                
+                <Button Height="32" ToolTip="Kill Process" Command="{Binding KillProcessCommand}">
+                    <Image Height="24" Source="/Resources/kill.png" Style="{StaticResource ImageEnabled}"></Image>
+                </Button>
+
+                <Separator/>
+                <Button Height="32" ToolTip="Refresh Process" Command="{Binding RefreshProcessCommand}">
+                    <Image Height="18" Source="/Resources/refresh.png" Style="{StaticResource ImageEnabled}"></Image>
+                </Button>
+                <Button Height="32" ToolTip="Refresh All Process" Command="{Binding RefreshAllProcessCommand}">
+                    <Image Height="18" Source="/Resources/refresh_A.png" Style="{StaticResource ImageEnabled}"></Image>
+                </Button>
             </ToolBar>
         </ToolBarTray>
     </Grid>

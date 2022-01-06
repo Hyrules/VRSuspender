@@ -17,6 +17,7 @@ using System.Drawing;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using VRSuspender.EditProcessForm;
+using Newtonsoft.Json;
 
 namespace VRSuspender
 {
@@ -29,16 +30,21 @@ namespace VRSuspender
         private ObservableCollection<TrackedProcess> _trackedProcess;
         private TrackedProcess _selectedTrackedProcess;
         private bool _isMonitoring;
+
+        private bool _startMinimized;
+        private bool _startWithWindows;
+        private bool _startMonitoringOnStartup;
+
         public MainFormViewModel()
         {
+            StartMonitoringOnStartup = Properties.Settings.Default.StartMonitorOnStartup;
+            StartMinimized = Properties.Settings.Default.StartMinimized;
+            StartWithWindows = Properties.Settings.Default.StartWithWindows;
+            
+
             _watchedProcess.Add("vrserver.exe");
-            _trackedProcess = new ObservableCollection<TrackedProcess>
-            {
-                new TrackedProcess("iCUE"),
-                new TrackedProcess("EK-Connect"),
-                new TrackedProcess("SamsungMagician"),
-                new TrackedProcess("msedge")
-            };
+            _trackedProcess = new ObservableCollection<TrackedProcess>();
+            LoadTrackedProcessProfiles();
             _isMonitoring = false;
             RefreshProcess();
         }
@@ -115,6 +121,24 @@ namespace VRSuspender
             Process newProcess = Process.Start(info);
         }
 
+        private void LoadTrackedProcessProfiles()
+        {
+
+            string profilePath = AppDomain.CurrentDomain.BaseDirectory + "Profiles";
+            if (Directory.Exists(profilePath))
+            {
+                string[] listProfiles = Directory.GetFiles(profilePath, "*.vrs");
+                foreach(string profile in listProfiles)
+                {
+                    StreamReader sr = new StreamReader(profile);
+                    string json = sr.ReadToEnd();
+
+                    TrackedProcess.Add(JsonConvert.DeserializeObject<TrackedProcess>(json));
+
+                }
+            }
+        }
+
         private void RefreshProcess(TrackedProcess process)
         {
             Process[] p = Process.GetProcessesByName(process.Name);
@@ -133,9 +157,18 @@ namespace VRSuspender
             }
             else
             {
-                process.Icon = new BitmapImage(new Uri("pack://application:,,,/Resources/del.png"));
-                process.Status = ProcessState.NotFound;
+                if(!string.IsNullOrEmpty(process.Path) && File.Exists(process.Path))
+                {
+                    process.Icon = Icon.ExtractAssociatedIcon(process.Path).ToImageSource();
+                }
+                else
+                {
+                    process.Icon = new BitmapImage(new Uri("pack://application:,,,/Resources/qm.png"));
+                    process.Status = ProcessState.NotFound;
+
+                }
             }
+    
         }
 
         private void RefreshProcess()
@@ -205,17 +238,40 @@ namespace VRSuspender
 
         #region COMMANDS
 
-        public ICommand EditCommand => new AsyncRelayCommand(param => EditSuspendedProcess(), param => CanEditSuspendedProcess());
+        public ICommand EditCommand => new RelayCommand(param => EditProcess(), param => CanEditSuspendedProcess());
         public ICommand DeleteCommand => new AsyncRelayCommand(param => DeleteSuspendedProcess(), param => CanDeleteSuspendedProcess());
-        public ICommand StartMonitoringCommand => new RelayCommand(param => StartMonitoring(), param => _isMonitoring == false);
-        public ICommand StopMonitoringCommand => new RelayCommand(param => StopMonitoring(), param => _isMonitoring == true);
+        public ICommand StartMonitoringCommand => new RelayCommand(param => StartMonitoring(), param => CanStartMonitor());
+        public ICommand StopMonitoringCommand => new RelayCommand(param => StopMonitoring(), param => CanStopMonitor());
         public ICommand ResumeProcessCommand => new RelayCommand(param => ResumeProcess(SelectedTrackedProcess), param => CanResumeProcess());
         public ICommand SuspendProcessCommand => new RelayCommand(param => SuspendProcess(SelectedTrackedProcess), param => CanSuspendedProcess());
         public ICommand KillProcessCommand => new RelayCommand(param => KillProcess(SelectedTrackedProcess), param => CanKillProcess());
         public ICommand RefreshProcessCommand => new RelayCommand(param => RefreshProcess(SelectedTrackedProcess), param => CanRefreshProcess());
         public ICommand RefreshAllProcessCommand => new RelayCommand(param => RefreshProcess());
         public ICommand EditProcessCommand => new RelayCommand(param => EditProcess(), param => CanEditProcess());
+        public ICommand AddProcessCommand => new RelayCommand(param => AddProces());
+        public ICommand SaveSettingsCommand => new RelayCommand(param => Properties.Settings.Default.Save());
 
+        private void AddProces()
+        {
+            EditTrackedProcessForm ProcessEditor = new EditTrackedProcessForm();
+            ProcessEditor.Owner = Application.Current.MainWindow;
+            if (ProcessEditor.ShowDialog() == true)
+            {
+                TrackedProcess ntp = ProcessEditor.GetTrackedProcess();
+                RefreshProcess(ntp);
+                TrackedProcess.Add(ntp);
+            }
+        }
+
+        private bool CanStartMonitor()
+        {
+            return _isMonitoring == false;
+        }
+
+        private bool CanStopMonitor()
+        {
+            return _isMonitoring == true;
+        }
         private bool CanEditProcess()
         {
             return SelectedTrackedProcess != null; 
@@ -223,8 +279,14 @@ namespace VRSuspender
 
         private void EditProcess()
         {
-            EditTrackedProcessForm ProcessEditor = new EditTrackedProcessForm();
-            ProcessEditor.ShowDialog();
+            EditTrackedProcessForm ProcessEditor = new EditTrackedProcessForm(_selectedTrackedProcess);
+            ProcessEditor.Owner = Application.Current.MainWindow;
+            if(ProcessEditor.ShowDialog() == true)
+            {
+                TrackedProcess process = ProcessEditor.GetTrackedProcess();
+                SelectedTrackedProcess.Name = process.Name;
+                SelectedTrackedProcess.Action = process.Action;
+            }
         }
 
         private bool CanRefreshProcess()
@@ -262,10 +324,6 @@ namespace VRSuspender
             return SelectedTrackedProcess != null;
         }
 
-        private Task EditSuspendedProcess()
-        {
-            return null;
-        }
 
         #endregion
 
@@ -278,28 +336,13 @@ namespace VRSuspender
 
         #region PROPERTIES
 
-        public ObservableCollection<string> Log 
-        { 
-            get => _log;  
-            private set => SetProperty(ref _log, value); 
-        }
-
-
-        public ObservableCollection<TrackedProcess> TrackedProcess 
-        { 
-            get => _trackedProcess; 
-            set => SetProperty(ref _trackedProcess,value); 
-        }
-
-        public int SuspendedProcessCount
-        {
-            get => _trackedProcess.Count;
-        }
-        public TrackedProcess SelectedTrackedProcess 
-        { 
-            get => _selectedTrackedProcess; 
-            set => SetProperty(ref _selectedTrackedProcess,value); 
-        }
+        public ObservableCollection<string> Log { get => _log; private set => SetProperty(ref _log, value); }
+        public ObservableCollection<TrackedProcess> TrackedProcess { get => _trackedProcess; set => SetProperty(ref _trackedProcess,value); }
+        public int SuspendedProcessCount { get => _trackedProcess.Count; }
+        public TrackedProcess SelectedTrackedProcess { get => _selectedTrackedProcess; set => SetProperty(ref _selectedTrackedProcess,value);  }
+        public bool StartMinimized { get => _startMinimized; set => SetProperty(ref _startMinimized,value); }
+        public bool StartWithWindows { get => _startWithWindows; set => SetProperty(ref _startWithWindows,value); }
+        public bool StartMonitoringOnStartup { get => _startMonitoringOnStartup; set => SetProperty(ref _startMonitoringOnStartup,value); }
         #endregion
     }
 

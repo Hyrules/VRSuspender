@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Windows.Media;
 using VRSuspender.Utils;
 
@@ -62,6 +62,8 @@ namespace VRSuspender
             get => _name;
             set => SetProperty(ref _name, value);
         }
+
+        [JsonIgnore]
         public ProcessState Status 
         { 
             get => _status; 
@@ -73,6 +75,7 @@ namespace VRSuspender
             set => SetProperty(ref _path, value);
 
         }
+        [JsonConverter(typeof(ProcessActionConverter))]
         public ProcessAction Action
         { 
             get => _action; 
@@ -86,4 +89,39 @@ namespace VRSuspender
             set => SetProperty(ref _icon,value); 
         }
     }
+
+    public class ProcessActionConverter : JsonConverter
+    {
+        public override bool CanConvert(Type typeToConvert)
+        {
+            return typeToConvert == typeof(string);
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            string enumString = (string)reader.Value;
+            return Enum.Parse(typeof(ProcessAction), enumString, true);
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            ProcessAction action = (ProcessAction)value;
+            switch (action)
+            {
+                case ProcessAction.Kill:
+                    writer.WriteValue("Suspend");
+                    break;
+                case ProcessAction.KeepRunning:
+                    writer.WriteValue("KeepRunning");
+                    break;
+                default:
+                case ProcessAction.Suspend:
+                    writer.WriteValue("Suspend");
+                    break;
+
+            }
+        }
+    }
+
+
 }
