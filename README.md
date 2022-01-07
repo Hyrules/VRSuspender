@@ -9,7 +9,7 @@ iCue, EK-Connect, msedge, SamsungMagician.
 
 More will come as people suggest them.
 
-This app is currently a Work in progress. It might crash and you might find bugs.
+This app is currently a work in progress. It might crash and you might find bugs.
 
 Require to run as administrator to modify the processes states.
 
