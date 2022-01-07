@@ -3,7 +3,7 @@ Suspend / Kill Process that interfere with SteamVR.
 
 Most of the time theses programs are softwares that monitor hardware onboard or control LEDs.
 
-**Already contains a few profiles :
+**Already contains a few profiles :**
 
 iCue, EK-Connect, msedge, SamsungMagician.
 
