@@ -20,7 +20,6 @@ Actions :
 Note: If you suspend a process with this app you won't be able to resume it from the task manager. There is no way in the task manager to suspend or resume process that have been suspended
 
 TODO:
-- Add button to manage process
 - Add option to save process list
 
 WARNING:
