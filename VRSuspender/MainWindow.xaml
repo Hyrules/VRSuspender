@@ -69,7 +69,7 @@
 
         <ListBox Name="lbLog" ItemsSource="{Binding Log, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" ScrollViewer.CanContentScroll="True" Grid.Row="3">
         </ListBox>
-        <ListView ItemsSource="{Binding ListTrackedProcess, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" SelectedItem="{Binding SelectedTrackedProcess}"  Grid.Row="2">
+        <ListView Name="lvTrackedProcess" ItemsSource="{Binding ListTrackedProcess, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" SelectedItem="{Binding SelectedTrackedProcess}"  Grid.Row="2">
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Edit..." Command="{Binding EditCommand}"/>
@@ -142,9 +142,9 @@
                     <Image Height="18" Source="/Resources/refresh_A.png" Style="{StaticResource ImageEnabled}"></Image>
                 </Button>
                 <Separator/>
-                <ComboBox Name="cbFilter" Width="120" SelectedIndex="{Binding SelectedFilter}">
+                <ComboBox Name="cbFilter" Width="120" SelectedIndex="{Binding SelectedFilterIndex}">
                     <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="Changed">
+                        <i:EventTrigger EventName="SelectionChanged">
                             <i:InvokeCommandAction Command="{Binding FilterMainViewCommand}"/>
                         </i:EventTrigger>
                     </i:Interaction.Triggers>

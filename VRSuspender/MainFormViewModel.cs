@@ -18,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using VRSuspender.EditProcessForm;
 using Newtonsoft.Json;
+using System.Windows.Data;
 
 namespace VRSuspender
 {
@@ -30,10 +31,11 @@ namespace VRSuspender
         private ObservableCollection<TrackedProcess> _listTrackedProcess;
         private TrackedProcess _selectedTrackedProcess;
         private bool _isMonitoring;
-        private uint _selectedFilterIndex;
+        private uint _selectedFilterIndex = 0;
         private bool _startWithWindows;
         private bool _startMonitoringOnStartup;
         private uint _startState;
+        private CollectionView _view;
 
         public MainFormViewModel()
         {
@@ -50,6 +52,13 @@ namespace VRSuspender
 
         }
        
+        public void SetCollectionViewItemSource(System.Collections.IEnumerable source)
+        {
+            _view = (CollectionView)CollectionViewSource.GetDefaultView(source);
+            _view.Filter = FilterMainViewProcessState;
+
+        }
+
         public void StartMonitoring()
         {
             startWatch.EventArrived += new EventArrivedEventHandler(startWatch_EventArrived);
@@ -251,12 +260,37 @@ namespace VRSuspender
         public ICommand EditProcessCommand => new RelayCommand(param => EditProcess(), param => CanEditProcess());
         public ICommand AddProcessCommand => new RelayCommand(param => AddProces());
         public ICommand SaveSettingsCommand => new RelayCommand(param => SaveSettings());
-        public ICommand FilterMainViewCommand => new RelayCommand(param => FilterMainView());
+        public ICommand FilterMainViewCommand => new RelayCommand(param => RefreshFilter());
+
+        private void RefreshFilter()
+        {
+            CollectionViewSource.GetDefaultView(_view).Refresh();
+        }
+
         public ICommand NotificationIconDoubleClickCommand => new RelayCommand(param => Application.Current.MainWindow.Show());
 
-        private void FilterMainView()
+        private bool FilterMainViewProcessState(object process)
         {
-            
+            if (SelectedFilterIndex == 0)
+                return true;
+            else
+            {
+                ProcessState state = ProcessState.Running;
+                switch (SelectedFilterIndex)
+                {
+                    case 1:
+                        state = ProcessState.Suspended;
+                        break;
+                    case 2:
+                        state = ProcessState.Running;
+                        break;
+                    case 3:
+                        state = ProcessState.Stopped;
+                        break;
+
+                }
+                return (process as TrackedProcess).Status == state;
+            }
         }
 
         private void SaveSettings()

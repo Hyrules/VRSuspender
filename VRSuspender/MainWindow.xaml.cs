@@ -28,7 +28,7 @@ namespace VRSuspender
         {
             InitializeComponent();
             _mfvm = DataContext as MainFormViewModel;
-
+            _mfvm.SetCollectionViewItemSource(lvTrackedProcess.ItemsSource);
 
         }
 
