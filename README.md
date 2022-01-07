@@ -17,7 +17,7 @@ Actions :
 - Kill : Kill the process and will try it's best to restart it afterward.
 - Suspend : Suspend the process. (you might see the window become greyed with at bar at the top and become unresponsive this is normal)
 
-Note: If you suspend a process with this app you won't be able to resume it from the task manager.
+Note: If you suspend a process with this app you won't be able to resume it from the task manager. There is no way in the task manager to suspend or resume process that have been suspended
 
 TODO:
 - Add button to manage process
