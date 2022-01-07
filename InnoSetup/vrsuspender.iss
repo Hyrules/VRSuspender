@@ -97,3 +97,14 @@ begin
     Log('[.NET] No compatible found');
     Result := False;
 end;
+
+function InitializeSetup(): Boolean;
+begin
+    if not hasDotNetCore('v3.1', 0) then begin
+        MsgBox('WinHue requires Microsoft .NET Core 3.0.'#13#13
+            'Please install this version,'#13
+            'and then re-run the VR Suspender setup program.', mbInformation, MB_OK);
+        result := false;
+    end else
+        result := true;
+end;

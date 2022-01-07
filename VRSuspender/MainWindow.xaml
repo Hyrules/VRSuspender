@@ -1,4 +1,4 @@
-﻿<Window x:Class="VRSuspender.MainWindow"
+﻿<mah:MetroWindow x:Class="VRSuspender.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,8 +6,9 @@
         xmlns:h="http://www.hardcodet.net/taskbar"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:local="clr-namespace:VRSuspender"
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="VR Suspender" Height="450" Width="800" ContentRendered="Window_ContentRendered" Closing="Window_Closing" WindowStartupLocation="CenterScreen">
+        Title="VR Suspender" Height="450" Width="800" ContentRendered="Window_ContentRendered" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip">
     <Window.Resources>
         <Style x:Key="ImageEnabled" TargetType="Image">
             <Style.Triggers>
@@ -28,20 +29,16 @@
     </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="22"></RowDefinition>
-            <RowDefinition Height="32"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="100"></RowDefinition>
-            <RowDefinition Height="22"></RowDefinition>
+            <RowDefinition Height="32"/>
+            <RowDefinition Height="42"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*" MinHeight="100" MaxHeight="250"/>
+            <RowDefinition Height="22"/>
         </Grid.RowDefinitions>
-        <h:TaskbarIcon Name="NotifyIcon" IconSource="/icon.ico" DoubleClickCommand="{Binding NotificationIconDoubleClickCommand}" Visibility="Visible" ToolTip="VR Suspender" ContextMenu="{StaticResource NotifyIconMenu}">
-
-        </h:TaskbarIcon>
-
-
-        <Menu Height="22" VerticalAlignment="Top" Grid.Row="0">
+        <h:TaskbarIcon Name="NotifyIcon" IconSource="/icon.ico" DoubleClickCommand="{Binding NotificationIconDoubleClickCommand}" Visibility="Visible" ToolTip="VR Suspender" ContextMenu="{StaticResource NotifyIconMenu}"/>
+        <Menu Height="32" VerticalAlignment="Top" Grid.Row="0">
             <MenuItem Name="mnuFile" Header="File">
-                <MenuItem Name="mnuQuit" Header="Quit"></MenuItem>
+                <MenuItem Name="mnuQuit" Header="Quit" />
             </MenuItem>
             <MenuItem Name="mnuOptions" Header="Options">
                 <ComboBox SelectedIndex="{Binding StartState}" Width="150">
@@ -106,8 +103,8 @@
         <StatusBar Grid.Row="4">
 
         </StatusBar>
-        <ToolBarTray Height="32" Grid.Row="1" VerticalAlignment="Center" >
-            <ToolBar Height="32">
+        <ToolBarTray Height="42" Grid.Row="1" VerticalAlignment="Center" >
+            <ToolBar Height="42">
                 <Button Height="32"  ToolTip="Start Monitoring for SteamVR" Command="{Binding StartMonitoringCommand}">
                     <Image Height="24" Source="/Resources/play.png" Style="{StaticResource ImageEnabled}"></Image>
                 </Button>
@@ -156,4 +153,4 @@
             </ToolBar>
         </ToolBarTray>
     </Grid>
-</Window>
+</mah:MetroWindow>
