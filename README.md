@@ -1,23 +1,36 @@
 # VRSuspender
 Suspend / Kill Process that interfere with SteamVR. 
 
-Most of the time theses programs are softwares that control LED like motherboard or keyboard and mouse.
+Most of the time theses programs are softwares that monitor hardware onboard or control LEDs.
 
-Work in progress. 
+Already contains a few profiles :
+
+iCue, EK-Connect, msedge, SamsungMagician.
+
+More will come as people suggest them.
+
+This app is currently a Work in progress. It might crash and you might find bugs.
 
 Require to run as administrator to modify the processes states.
 
-Automatically detect SteamVR (vrserver.exe) and suspend process that causes spikes in SteamVR. You will have to specify the programs you want to close or suspend as the application does not detect this automatically. Some known programs are already setup in the app but they might not all be there.
+Automatically detect SteamVR (vrmonitor.exe) and suspend/kill process that causes spikes in SteamVR. You will have to specify the programs you want to close or suspend as the application does not detect this automatically.
 
-Start this application and then start SteamVR. If you have any of theses process they will be suspended. They will automatically resume after you exit SteamVR.
+How to use :
+
+1. Start this application
+2. Start monitoring for SteamVR 
+3. Start SteamVR. 
+ 
+If you have any monitored process in your list they will be suspended or killed. They will automatically resume after you exit SteamVR.
 You can either Suspend, Kill or keep Running the process.
 
 Actions : 
 
-- Kill : Kill the process and will try it's best to restart it afterward.
-- Suspend : Suspend the process. (you might see the window become greyed with at bar at the top and become unresponsive this is normal)
+- Kill : Kill the process and will try it's best to restart it afterward. Note that this is not a gracefull kill and is recommended only when suspend is not possible or does not work properly.
+- Suspend : Suspend the process. You might see the window become greyed with at bar at the top and become unresponsive this is normal behavior. You will not be able to use the application while it is suspended.
+- Keep Running : You can also have the process keep running if you want.
 
-Note: If you suspend a process with this app you won't be able to resume it from the task manager. There is no way in the task manager to suspend or resume process that have been suspended
+Note: If you suspend a process with this app you won't be able to resume it from the task manager. There is no way in the task manager to suspend or resume process that has been suspended.
 
 TODO:
 - Add option to save process list
