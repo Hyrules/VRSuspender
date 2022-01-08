@@ -162,7 +162,22 @@ namespace VRSuspender
                 {
                     process.Icon = new BitmapImage(new Uri("pack://application:,,,/Resources/qm.png"));
                 }
-                process.Status = p[0].Threads[0].WaitReason == ThreadWaitReason.Suspended ? ProcessState.Suspended : ProcessState.Running;
+
+                if(p[0].Threads[0].ThreadState == ThreadState.Wait)
+                {
+                    if(p[0].Threads[0].WaitReason == ThreadWaitReason.Suspended)
+                    {
+                        process.Status = ProcessState.Suspended;
+                    }
+                    else
+                    {
+                        process.Status = ProcessState.Running;
+                    }
+                }
+                else
+                {
+                    process.Status = ProcessState.Running;
+                }
                 process.Path = p[0].MainModule.FileName;
             }
             else

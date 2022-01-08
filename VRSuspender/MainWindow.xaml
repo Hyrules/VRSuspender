@@ -1,4 +1,4 @@
-﻿<mah:MetroWindow x:Class="VRSuspender.MainWindow"
+﻿<adonisControls:AdonisWindow x:Class="VRSuspender.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,15 +6,18 @@
         xmlns:h="http://www.hardcodet.net/taskbar"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:local="clr-namespace:VRSuspender"
-        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"     
+        xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+        xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
         mc:Ignorable="d"
-        Title="VR Suspender" Height="450" Width="800" ContentRendered="Window_ContentRendered" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip">
-    <Window.Resources>
-        <Style x:Key="ImageEnabled" TargetType="Image">
+        Title="VR Suspender" Height="450" Width="800" ContentRendered="Window_ContentRendered" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="CanResize" IconVisibility="Visible" TitleVisibility="Visible">
+    <adonisControls:AdonisWindow.Resources>
+        <SolidColorBrush Color="#FFCFCFCF" x:Key="VRSuspenderGreen"/>
+        <Style x:Key="ImageEnabled" TargetType="{x:Type Control}">
             <Style.Triggers>
-                <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Opacity" Value="0.25"></Setter>
-                </Trigger>
+                <DataTrigger Binding="{Binding IsEnabled, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Button}}}" Value="False">
+                    <Setter Property="Foreground" Value="Black"></Setter>
+                </DataTrigger>
             </Style.Triggers>
         </Style>
         <ContextMenu x:Key="NotifyIconMenu">
@@ -23,20 +26,26 @@
             <Separator/>
             <MenuItem Name="mnuNIQuit" Header="Quit" Click="mnuNIQuit_Click"/>
         </ContextMenu>
-    </Window.Resources>
-    <Window.DataContext>
+    </adonisControls:AdonisWindow.Resources>
+    <adonisControls:AdonisWindow.TitleBarBackground>
+        <LinearGradientBrush EndPoint="0,1" StartPoint="1,1">
+            <GradientStop Color="#FF255F25"/>
+            <GradientStop Color="Black" Offset="1"/>
+        </LinearGradientBrush>
+    </adonisControls:AdonisWindow.TitleBarBackground>
+    <adonisControls:AdonisWindow.DataContext>
         <local:MainFormViewModel></local:MainFormViewModel>
-    </Window.DataContext>
+    </adonisControls:AdonisWindow.DataContext>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="32"/>
+            <RowDefinition Height="24"/>
             <RowDefinition Height="42"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*" MinHeight="100" MaxHeight="250"/>
             <RowDefinition Height="22"/>
         </Grid.RowDefinitions>
         <h:TaskbarIcon Name="NotifyIcon" IconSource="/icon.ico" DoubleClickCommand="{Binding NotificationIconDoubleClickCommand}" Visibility="Visible" ToolTip="VR Suspender" ContextMenu="{StaticResource NotifyIconMenu}"/>
-        <Menu Height="32" VerticalAlignment="Top" Grid.Row="0">
+        <Menu Height="24" VerticalAlignment="Top" Grid.Row="0" FontSize="13">
             <MenuItem Name="mnuFile" Header="File">
                 <MenuItem Name="mnuQuit" Header="Quit" />
             </MenuItem>
@@ -60,13 +69,13 @@
                 </MenuItem>
             </MenuItem>
             <MenuItem Name="mnuHelp" Header="Help">
-
+                <MenuItem Header="About"/>
             </MenuItem>
         </Menu>
 
         <ListBox Name="lbLog" ItemsSource="{Binding Log, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" ScrollViewer.CanContentScroll="True" Grid.Row="3">
         </ListBox>
-        <ListView Name="lvTrackedProcess" ItemsSource="{Binding ListTrackedProcess, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" SelectedItem="{Binding SelectedTrackedProcess}"  Grid.Row="2">
+        <ListView Name="lvTrackedProcess" ItemsSource="{Binding ListTrackedProcess, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" SelectedItem="{Binding SelectedTrackedProcess}" Grid.Row="2" >
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Edit..." Command="{Binding EditCommand}"/>
@@ -103,40 +112,41 @@
         <StatusBar Grid.Row="4">
 
         </StatusBar>
-        <ToolBarTray Height="42" Grid.Row="1" VerticalAlignment="Center" >
-            <ToolBar Height="42">
-                <Button Height="32"  ToolTip="Start Monitoring for SteamVR" Command="{Binding StartMonitoringCommand}">
-                    <Image Height="24" Source="/Resources/play.png" Style="{StaticResource ImageEnabled}"></Image>
+        <ToolBarTray Name="TbtToolbar" Height="42" Grid.Row="1" VerticalAlignment="Center" IsLocked="True"  >
+            <ToolBar Height="42" Width="{Binding ElementName=TbtToolbar, Path=ActualWidth}">
+                <Button Height="32" ToolTip="Start Monitoring for SteamVR" Command="{Binding StartMonitoringCommand}" >
+                    <iconPacks:PackIconForkAwesome Height="20" Kind="Play"  Foreground="{StaticResource VRSuspenderGreen}" Style="{StaticResource ImageEnabled}"/>
                 </Button>
                 <Button Height="32" ToolTip="Stop Monitoring for SteamVR" Command="{Binding StopMonitoringCommand}">
-                    <Image Height="24" Source="/Resources/stop.png" Style="{StaticResource ImageEnabled}"></Image>
+                    <iconPacks:PackIconForkAwesome Height="20" Kind="Stop"  Foreground="{StaticResource VRSuspenderGreen}" Style="{StaticResource ImageEnabled}"/>
                 </Button>
                 <Separator/>
                 <Button Height="32" ToolTip="Add Tracked Process" Command="{Binding AddProcessCommand}">
-                    <Image Height="20" Source="/Resources/add.png" Style="{StaticResource ImageEnabled}"></Image>
+                    <iconPacks:PackIconForkAwesome Height="20" Kind="Plus"  Foreground="{StaticResource VRSuspenderGreen}" Style="{StaticResource ImageEnabled}"/>
                 </Button>
                 <Button Height="32" ToolTip="Edit Tracked Process" Command="{Binding EditProcessCommand}">
-                    <Image Height="15" Source="/Resources/edit.png" Style="{StaticResource ImageEnabled}"></Image>
+                    <iconPacks:PackIconForkAwesome Height="20" Kind="Pencil"  Foreground="{StaticResource VRSuspenderGreen}" Style="{StaticResource ImageEnabled}"/>
                 </Button>
                 <Button Height="32" ToolTip="Delete Tracked Process" Command="{Binding DeleteCommand}">
-                    <Image Height="24" Source="/Resources/del.png" Style="{StaticResource ImageEnabled}"></Image>
+                    <iconPacks:PackIconForkAwesome Height="20" Kind="Trash"  Foreground="{StaticResource VRSuspenderGreen}" Style="{StaticResource ImageEnabled}"/>
                 </Button>
                 <Separator/>
                 <Button Height="32" ToolTip="Suspend Process" Command="{Binding SuspendProcessCommand}">
-                    <Image Height="24" Source="/Resources/suspend.png" Style="{StaticResource ImageEnabled}"></Image>
+                    <iconPacks:PackIconForkAwesome Height="20" Kind="Pause"  Foreground="{StaticResource VRSuspenderGreen}" Style="{StaticResource ImageEnabled}"/>
                 </Button>
                 <Button Height="32" ToolTip="Resume Process" Command="{Binding ResumeProcessCommand}">
-                    <Image Height="24" Source="/Resources/resume.png" Stretch="Fill" Style="{StaticResource ImageEnabled}"></Image>
+                    <iconPacks:PackIconFontAwesome Height="20" Kind="RunningSolid"  Foreground="{StaticResource VRSuspenderGreen}" Style="{StaticResource ImageEnabled}"/>
                 </Button>
                 <Button Height="32" ToolTip="Kill Process" Command="{Binding KillProcessCommand}">
-                    <Image Height="24" Source="/Resources/kill.png" Style="{StaticResource ImageEnabled}"></Image>
+                    <iconPacks:PackIconForkAwesome Height="20" Kind="Times"  Foreground="{StaticResource VRSuspenderGreen}" Style="{StaticResource ImageEnabled}"/>
                 </Button>
                 <Separator/>
                 <Button Height="32" ToolTip="Refresh Process" Command="{Binding RefreshProcessCommand}">
-                    <Image Height="18" Source="/Resources/refresh.png" Style="{StaticResource ImageEnabled}"></Image>
+                    <iconPacks:PackIconFontAwesome Height="20" Kind="RedoSolid"  Foreground="{StaticResource VRSuspenderGreen}" Style="{StaticResource ImageEnabled}"/>
+
                 </Button>
                 <Button Height="32" ToolTip="Refresh All Process" Command="{Binding RefreshAllProcessCommand}">
-                    <Image Height="18" Source="/Resources/refresh_A.png" Style="{StaticResource ImageEnabled}"></Image>
+                    <iconPacks:PackIconFontAwesome Height="20" Kind="SyncSolid"  Foreground="{StaticResource VRSuspenderGreen}" Style="{StaticResource ImageEnabled}"/>
                 </Button>
                 <Separator/>
                 <ComboBox Name="cbFilter" Width="120" SelectedIndex="{Binding SelectedFilterIndex}">
@@ -153,4 +163,4 @@
             </ToolBar>
         </ToolBarTray>
     </Grid>
-</mah:MetroWindow>
+</adonisControls:AdonisWindow>

@@ -3,10 +3,10 @@
 
 
 #define MyAppExeName "VRSuspender.exe"
-#define VRSuspender "[[[VRSUSPENDER]]]"
-#define Debug "bin\Debug\"
-#define Folder Str(VRSuspender) + Str(Debug)
-#define MyVersion GetFileVersion(Str(Folder) + "VRSuspender.exe")
+#define VRSuspender "D:\Repos\VRSuspender\VRSuspender\"
+#define Debug "bin\Debug\net6.0-windows10.0.17763.0"
+#define Folder Str(VRSuspender) + Str(Debug) + "\"
+#define MyVersion GetVersionNumbersString(Str(Folder) + "VRSuspender.exe")
 #define MyAppName "VR Suspender"
 #define MyAppVersion Str(MyVersion)
 #define MyAppPublisher "Pascal Pharand"
@@ -34,7 +34,7 @@ Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=admin
 SetupIconFile="{#VRSuspender}\Resources\icon.ico"
-;InfoBeforeFile="{#VRSuspender}Build\README.txt"
+InfoBeforeFile="D:\Repos\VRSuspender\README.md"
 UninstallDisplayIcon="{#VRSuspender}\Resources\icon.ico"
 
 [Languages]
@@ -48,6 +48,7 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 
 Source: "{#Folder}*.pdb"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#Folder}*.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#Folder}Profiles\*.vrs"; DestDir: "{app}\Profiles"; Flags: ignoreversion
 Source: "{#Folder}VRSuspender.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
@@ -62,49 +63,3 @@ Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Fil
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent runascurrentuser
 
-[Code]
-function hasDotNetCore(version: string) : boolean;
-var
-    runtimes: TArrayOfString;
-    I: Integer;
-    versionCompare: Integer;
-    registryKey: string;
-begin
-    registryKey := 'SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.NETCore.App';
-    if(not IsWin64) then
-       registryKey :=  'SOFTWARE\dotnet\Setup\InstalledVersions\x86\sharedfx\Microsoft.NETCore.App';
-       
-    Log('[.NET] Look for version ' + version);
-       
-    if not RegGetValueNames(HKLM, registryKey, runtimes) then
-    begin
-      Log('[.NET] Issue getting runtimes from registry');
-      Result := False;
-      Exit;
-    end;
-    
-    for I := 0 to GetArrayLength(runtimes)-1 do
-    begin
-      versionCompare := CompareVersion(runtimes[I], version);
-      Log(Format('[.NET] Compare: %s/%s = %d', [runtimes[I], version, versionCompare]));
-      if(not (versionCompare = -1)) then
-      begin
-        Log(Format('[.NET] Selecting %s', [runtimes[I]]));
-        Result := True;
-          Exit;
-      end;
-    end;
-    Log('[.NET] No compatible found');
-    Result := False;
-end;
-
-function InitializeSetup(): Boolean;
-begin
-    if not hasDotNetCore('v3.1', 0) then begin
-        MsgBox('WinHue requires Microsoft .NET Core 3.0.'#13#13
-            'Please install this version,'#13
-            'and then re-run the VR Suspender setup program.', mbInformation, MB_OK);
-        result := false;
-    end else
-        result := true;
-end;

@@ -15,14 +15,16 @@ using System.Windows.Shapes;
 using System.Diagnostics;
 using VRSuspender.Extensions;
 using Hardcodet.Wpf;
-using MahApps.Metro.Controls;
+using AdonisUI;
+using AdonisUI.Controls;
+
 
 namespace VRSuspender
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : MetroWindow
+    public partial class MainWindow : AdonisWindow
     {
         private MainFormViewModel _mfvm;
         public MainWindow()

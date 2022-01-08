@@ -17,7 +17,7 @@ namespace VRSuspender
     {
         public App()
         {
-
+           
         }
 
         private void Application_Startup(object sender, StartupEventArgs e)
