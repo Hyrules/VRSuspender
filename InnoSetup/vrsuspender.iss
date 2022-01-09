@@ -4,7 +4,7 @@
 
 #define MyAppExeName "VRSuspender.exe"
 #define VRSuspender "D:\Repos\VRSuspender\VRSuspender\"
-#define Debug "bin\Debug\net6.0-windows10.0.17763.0"
+#define Debug "bin\Release\net6.0-windows10.0.17763.0"
 #define Folder Str(VRSuspender) + Str(Debug) + "\"
 #define MyVersion GetVersionNumbersString(Str(Folder) + "VRSuspender.exe")
 #define MyAppName "VR Suspender"
@@ -46,10 +46,12 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 
 [Files]
 
-Source: "{#Folder}*.pdb"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#Folder}*.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#Folder}Profiles\*.vrs"; DestDir: "{app}\Profiles"; Flags: ignoreversion
-Source: "{#Folder}VRSuspender.exe"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "{#Folder}*.pdb"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "{#Folder}*.dll"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "{#Folder}Profiles\*.vrs"; DestDir: "{app}\Profiles"; Flags: ignoreversion
+;Source: "{#Folder}ref\*"; DestDir: "{app}\ref"; Flags: ignoreversion recursesubdirs
+;Source: "{#Folder}runtimes\*"; DestDir: "{app}\runtime"; Flags: ignoreversion recursesubdirs
+Source: "{#Folder}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 

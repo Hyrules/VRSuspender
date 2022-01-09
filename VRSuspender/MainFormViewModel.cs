@@ -19,15 +19,16 @@ using System.Windows.Media.Imaging;
 using VRSuspender.EditProcessForm;
 using Newtonsoft.Json;
 using System.Windows.Data;
+using Microsoft.Win32;
 
 namespace VRSuspender
 {
     public class MainFormViewModel : ValidatableBindableBase
     {
-        private ObservableCollection<string> _log = new ObservableCollection<string>();
-        private ManagementEventWatcher startWatch = new ManagementEventWatcher(new WqlEventQuery("SELECT * FROM Win32_ProcessStartTrace WHERE ProcessName = 'vrmonitor.exe'"));
-        private ManagementEventWatcher stopWatch = new ManagementEventWatcher(new WqlEventQuery("SELECT * FROM Win32_ProcessStopTrace WHERE ProcessName = 'vrmonitor.exe'"));
-        private ObservableCollection<string> _listWatchedProcess = new ObservableCollection<string>();
+        private ObservableCollection<string> _log = new();
+        private readonly ManagementEventWatcher startWatch = new(new WqlEventQuery("SELECT * FROM Win32_ProcessStartTrace WHERE ProcessName = 'vrmonitor.exe'"));
+        private readonly ManagementEventWatcher stopWatch = new(new WqlEventQuery("SELECT * FROM Win32_ProcessStopTrace WHERE ProcessName = 'vrmonitor.exe'"));
+        private readonly ObservableCollection<string> _listWatchedProcess = new();
         private ObservableCollection<TrackedProcess> _listTrackedProcess;
         private TrackedProcess _selectedTrackedProcess;
         private bool _isMonitoring;
@@ -36,12 +37,13 @@ namespace VRSuspender
         private bool _startMonitoringOnStartup;
         private uint _startState;
         private CollectionView _view;
+        private bool _vrRunning = false;
 
         public MainFormViewModel()
         {
             StartMonitoringOnStartup = Properties.Settings.Default.StartMonitorOnStartup;
             StartState = Properties.Settings.Default.StartState;
-            
+            StartWithWindows = Properties.Settings.Default.StartWithWindows;
 
             _listWatchedProcess.Add("vrserver.exe");
             _listTrackedProcess = new ObservableCollection<TrackedProcess>();
@@ -61,10 +63,10 @@ namespace VRSuspender
 
         public void StartMonitoring()
         {
-            startWatch.EventArrived += new EventArrivedEventHandler(startWatch_EventArrived);
+            startWatch.EventArrived += new EventArrivedEventHandler(StartWatch_EventArrived);
             startWatch.Start();
 
-            stopWatch.EventArrived += new EventArrivedEventHandler(stopWatch_EventArrived);
+            stopWatch.EventArrived += new EventArrivedEventHandler(StopWatch_EventArrived);
             stopWatch.Start();
 
             IsMonitoring = true;
@@ -80,11 +82,52 @@ namespace VRSuspender
             WriteToLog("Stopped monitoring of SteamVR.");
         }
 
-        #region EVENTS
-        void stopWatch_EventArrived(object sender, EventArrivedEventArgs e)
-        {
-            WriteToLog(e.NewEvent.Properties["ProcessName"].Value + " Stopped.");            
 
+
+        #region EVENTS
+
+        void StartWatch_EventArrived(object sender, EventArrivedEventArgs e)
+        {
+            WriteToLog(e.NewEvent.Properties["ProcessName"].Value + " Started.");
+            ApplyStartVRActionToProcess();
+        }
+
+        public void ApplyStartVRActionToProcess()
+        {
+            if (VrRunning) return;
+            RefreshProcess();
+            foreach (TrackedProcess s in _listTrackedProcess)
+            {
+                switch (s.Action)
+                {
+                    case ProcessAction.Suspend:
+                        SuspendProcess(s);
+                        break;
+                    case ProcessAction.Kill:
+                        KillProcess(s);
+                        break;
+                    case ProcessAction.KeepRunning:
+                        s.Status = ProcessState.Running;
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+
+            VrRunning = true;
+        }
+
+        void StopWatch_EventArrived(object sender, EventArrivedEventArgs e)
+        {
+            WriteToLog(e.NewEvent.Properties["ProcessName"].Value + " Stopped.");
+            ApplyStopVRActionToProcess();
+
+        }
+        public void ApplyStopVRActionToProcess()
+        {
+            if(!VrRunning) return;
+            RefreshProcess();
             foreach (TrackedProcess s in _listTrackedProcess)
             {
                 switch (s.Action)
@@ -102,15 +145,22 @@ namespace VRSuspender
                         break;
 
                 }
-                                            
-            }
 
+            }
+            VrRunning = false;
         }
+        #endregion
 
         private void ResumeProcess(TrackedProcess process)
         {
             
             Process[] p = Process.GetProcessesByName(process.Name);
+            // DO NOT RESUME A PROCESS THAT IS RUNNING, STOPPED OR NOT FOUND
+            if(process.Status == ProcessState.Running || process.Status == ProcessState.Stopped || process.Status == ProcessState.NotFound)
+            {
+                WriteToLog($"Process {process.Name} is already {process.Status}. Cannot resume.");
+                return;
+            }
             if (p.Length > 0)
             {
                 foreach (Process p2 in p)
@@ -124,11 +174,24 @@ namespace VRSuspender
 
         private void RestartProcess(TrackedProcess process)
         {
-            if (string.IsNullOrEmpty(process.Path)) return;
+            // IF FOR SOME REASON THERE IS NO PROCESS PATH DON'T TRY TO RESTART THE PROCESS
+            if (string.IsNullOrEmpty(process.Path))
+            {
+                WriteToLog($"Process {process.Name} has no path. Cannot restart.");
+                return;
+            }
+            // DO NOT RESTART A PROCESS THAT IS ALREADY RUNNING OR IS SUSPENDED
+            if (process.Status == ProcessState.Running || process.Status == ProcessState.Suspended)
+            {
+                WriteToLog($"Process {process.Name} is already {process.Status}. Will not restart the process.");
+                return;
+            }
             WriteToLog($"Starting {process.Name}");
-            ProcessStartInfo info = new ProcessStartInfo(process.Path);
-            info.WindowStyle = ProcessWindowStyle.Minimized;
-            Process newProcess = Process.Start(info);
+            ProcessStartInfo info = new(process.Path)
+            {
+                WindowStyle = ProcessWindowStyle.Minimized
+            };
+            Process.Start(info);
         }
 
         private void LoadTrackedProcessProfiles()
@@ -140,7 +203,7 @@ namespace VRSuspender
                 string[] listProfiles = Directory.GetFiles(profilePath, "*.vrs");
                 foreach(string profile in listProfiles)
                 {
-                    StreamReader sr = new StreamReader(profile);
+                    StreamReader sr = new(profile);
                     string json = sr.ReadToEnd();
 
                     ListTrackedProcess.Add(JsonConvert.DeserializeObject<TrackedProcess>(json));
@@ -149,7 +212,7 @@ namespace VRSuspender
             }
         }
 
-        private void RefreshProcess(TrackedProcess process)
+        private static void RefreshProcess(TrackedProcess process)
         {
             Process[] p = Process.GetProcessesByName(process.Name);
             if (p.Length > 0)
@@ -160,7 +223,7 @@ namespace VRSuspender
                 }
                 catch (Exception)
                 {
-                    process.Icon = new BitmapImage(new Uri("pack://application:,,,/Resources/qm.png"));
+                    process.Icon = new BitmapImage(new Uri("/Resources/qm.png"));
                 }
 
                 if(p[0].Threads[0].ThreadState == ThreadState.Wait)
@@ -188,7 +251,7 @@ namespace VRSuspender
                 }
                 else
                 {
-                    process.Icon = new BitmapImage(new Uri("pack://application:,,,/Resources/qm.png"));
+                    process.Icon = new BitmapImage(new Uri("/Resources/qm.png"));
                     process.Status = ProcessState.NotFound;
 
                 }
@@ -205,40 +268,26 @@ namespace VRSuspender
         }
 
 
-        void startWatch_EventArrived(object sender, EventArrivedEventArgs e)
+
+        private void KillProcess(TrackedProcess process, bool noprompt = true)
         {
-            WriteToLog(e.NewEvent.Properties["ProcessName"].Value + " Started.");            
-   
-            foreach(TrackedProcess s in _listTrackedProcess)
-            {    
-                switch (s.Action)
-                {
-                    case ProcessAction.Suspend:
-                        SuspendProcess(s);
-                        break;
-                    case ProcessAction.Kill:
-                        KillProcess(s);
-                        break;
-                    case ProcessAction.KeepRunning:
-                        s.Status = ProcessState.Running;
-                        break;
-                    default:
-                        break;
-                }
+            // SILENT KILL OR NOT WHEN USING COMMAND
+            if(!noprompt)
+                if (MessageBox.Show($"Are you sure you want to kill {process.Name} ?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No) return;
+            // DONT KILL IF STOPPED OR NOT FOUND
+            if (process.Status == ProcessState.NotFound || process.Status == ProcessState.Stopped)
+            {
+                WriteToLog($"Process {process.Name} is already {process.Status}. Process will not be killed.");
+                return;
 
             }
-                     
-        }
-        private void KillProcess(TrackedProcess process)
-        {
-            if (MessageBox.Show($"Are you sure you want to kill {process.Name} ?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No) return;
             Process[] p = Process.GetProcessesByName(process.Name);
             if (p.Length > 0)
             {
                 foreach (Process p2 in p)
                 {
                     WriteToLog($"Terminating {p2.ProcessName}");
-                    p2.Kill(true);
+                    p2.Kill();
                     p2.Close();
                 }
             }
@@ -247,11 +296,18 @@ namespace VRSuspender
         private void SuspendProcess(TrackedProcess process)
         {
             Process[] p = Process.GetProcessesByName(process.Name);
+            // DONT SUSPEND PROCESS IF ALREADY SUSPENDED STOPPED OR NOT FOUND
+            if (process.Status == ProcessState.Suspended || process.Status == ProcessState.Stopped || process.Status == ProcessState.NotFound)
+            {
+                WriteToLog($"Process {process.Name} is {process.Status}. Process will not be suspended.");
+                return;
+            }
             if (p.Length > 0)
             {
                 foreach (Process p2 in p)
                 {
                     if (p2.HasExited) continue;
+                    
                     WriteToLog($"Suspending {p2.ProcessName}");
                     p2.Suspend();
                     process.Status = ProcessState.Suspended;
@@ -264,25 +320,31 @@ namespace VRSuspender
         #region COMMANDS
 
         public ICommand EditCommand => new RelayCommand(param => EditProcess(), param => CanEditSuspendedProcess());
-        public ICommand DeleteCommand => new RelayCommand(param => DeleteSuspendedProcess(), param => CanDeleteSuspendedProcess());
+        public ICommand DeleteProcessCommand => new RelayCommand(param => DeleteSuspendedProcess(SelectedTrackedProcess), param => CanDeleteSuspendedProcess());
         public ICommand StartMonitoringCommand => new RelayCommand(param => StartMonitoring(), param => CanStartMonitor());
         public ICommand StopMonitoringCommand => new RelayCommand(param => StopMonitoring(), param => CanStopMonitor());
         public ICommand ResumeProcessCommand => new RelayCommand(param => ResumeProcess(SelectedTrackedProcess), param => CanResumeProcess());
         public ICommand SuspendProcessCommand => new RelayCommand(param => SuspendProcess(SelectedTrackedProcess), param => CanSuspendedProcess());
-        public ICommand KillProcessCommand => new RelayCommand(param => KillProcess(SelectedTrackedProcess), param => CanKillProcess());
+        public ICommand KillProcessCommand => new RelayCommand(param => KillProcess(SelectedTrackedProcess, false), param => CanKillProcess());
         public ICommand RefreshProcessCommand => new RelayCommand(param => RefreshProcess(SelectedTrackedProcess), param => CanRefreshProcess());
         public ICommand RefreshAllProcessCommand => new RelayCommand(param => RefreshProcess());
         public ICommand EditProcessCommand => new RelayCommand(param => EditProcess(), param => CanEditProcess());
         public ICommand AddProcessCommand => new RelayCommand(param => AddProces());
         public ICommand SaveSettingsCommand => new RelayCommand(param => SaveSettings());
         public ICommand FilterMainViewCommand => new RelayCommand(param => RefreshFilter());
+        public ICommand ShowAboutWindowCommand => new RelayCommand(param => ShowAboutWindow());
+
+        private void ShowAboutWindow()
+        {
+            
+        }
 
         private void RefreshFilter()
         {
             CollectionViewSource.GetDefaultView(_view).Refresh();
         }
 
-        public ICommand NotificationIconDoubleClickCommand => new RelayCommand(param => Application.Current.MainWindow.Show());
+        public static ICommand NotificationIconDoubleClickCommand => new RelayCommand(param => Application.Current.MainWindow.Show());
 
         private bool FilterMainViewProcessState(object process)
         {
@@ -312,15 +374,45 @@ namespace VRSuspender
         {
            
             Properties.Settings.Default.StartState = StartState;
+            Properties.Settings.Default.StartWithWindows = StartWithWindows;
+            SetStartWithWindows(StartWithWindows);
             Properties.Settings.Default.StartMonitorOnStartup = StartMonitoringOnStartup;
             Properties.Settings.Default.Save();
 
         }
 
+        private void SetStartWithWindows(bool start)
+        {
+            RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
+            if (start)
+            {            
+                if (rkApp.GetValue("VRSuspender") == null)
+                {
+                    WriteToLog("VRSuspender will start with windows.");
+                    string exe = $"\"{Environment.ProcessPath}\"";
+                    rkApp.SetValue("VRSuspender", exe);
+                }
+                else
+                {
+                    WriteToLog("VR Suspender is already set to start with Windows.");
+                }
+
+            }
+            else
+            {
+                WriteToLog("VRSuspender has been removed from Windows startup applications.");
+                rkApp.DeleteValue("VRSuspender", false);
+            }
+
+        }
+
         private void AddProces()
         {
-            EditTrackedProcessForm ProcessEditor = new EditTrackedProcessForm();
-            ProcessEditor.Owner = Application.Current.MainWindow;
+            EditTrackedProcessForm ProcessEditor = new()
+            {
+                Owner = Application.Current.MainWindow
+            };
             if (ProcessEditor.ShowDialog() == true)
             {
                 TrackedProcess ntp = ProcessEditor.GetTrackedProcess();
@@ -345,9 +437,11 @@ namespace VRSuspender
 
         private void EditProcess()
         {
-            EditTrackedProcessForm ProcessEditor = new EditTrackedProcessForm(_selectedTrackedProcess);
-            ProcessEditor.Owner = Application.Current.MainWindow;
-            if(ProcessEditor.ShowDialog() == true)
+            EditTrackedProcessForm ProcessEditor = new(_selectedTrackedProcess)
+            {
+                Owner = Application.Current.MainWindow
+            };
+            if (ProcessEditor.ShowDialog() == true)
             {
                 TrackedProcess process = ProcessEditor.GetTrackedProcess();
                 SelectedTrackedProcess.Name = process.Name;
@@ -381,8 +475,15 @@ namespace VRSuspender
             return SelectedTrackedProcess != null;
         }
 
-        private void DeleteSuspendedProcess()
+        private void DeleteSuspendedProcess(TrackedProcess process)
         {
+            // PREVENT USER FROM REMOVING A SUSPENDED PROCESS. THIS WOULD LEAVE THE PROCESS IN SUSPENDED WITHOUT A WAY TO RESUME IT.
+            if (process.Status == ProcessState.Suspended) 
+            {
+                MessageBox.Show($"Process {process.Name} is suspended. Please resume the process before removing it.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                WriteToLog($"Process {process.Name} is suspended. Please resume the process before removing it.");
+                return;
+            };
             ListTrackedProcess.Remove(SelectedTrackedProcess);
         }
 
@@ -398,8 +499,6 @@ namespace VRSuspender
             Application.Current.Dispatcher.BeginInvoke(new Action(() => Log.Insert(0,$"[{DateTime.Now}] - {message}.")));
         }
 
-        #endregion
-
         #region PROPERTIES
 
         public ObservableCollection<string> Log { get => _log; private set => SetProperty(ref _log, value); }
@@ -411,6 +510,7 @@ namespace VRSuspender
         public uint SelectedFilterIndex { get => _selectedFilterIndex; set => SetProperty(ref _selectedFilterIndex,value); }
         public bool IsMonitoring { get => _isMonitoring; set => SetProperty(ref _isMonitoring,value); }
         public uint StartState { get => _startState; set => SetProperty(ref _startState,value); }
+        public bool VrRunning { get => _vrRunning; private set => SetProperty(ref _vrRunning,value); }
         #endregion
     }
 

@@ -9,15 +9,18 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using AdonisUI;
+using AdonisUI.Controls;
 
+    
 namespace VRSuspender.EditProcessForm
 {
     /// <summary>
     /// Interaction logic for EditSuspendedProcessForm.xaml
     /// </summary>
-    public partial class EditTrackedProcessForm : Window
+    public partial class EditTrackedProcessForm : AdonisUI.Controls.AdonisWindow
     {
-        private EditTrackedProcessFormViewModel _espfvm;
+        private readonly EditTrackedProcessFormViewModel _espfvm;
         public EditTrackedProcessForm()
         {
             InitializeComponent();
@@ -29,13 +32,13 @@ namespace VRSuspender.EditProcessForm
             _espfvm.EditTrackedProcess(process);
         }
 
-        private void btnSave_Click(object sender, RoutedEventArgs e)
+        private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
             Close();
         }
 
-        private void btnCance_Click(object sender, RoutedEventArgs e)
+        private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
             Close();

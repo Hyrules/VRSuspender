@@ -17,6 +17,7 @@ using VRSuspender.Extensions;
 using Hardcodet.Wpf;
 using AdonisUI;
 using AdonisUI.Controls;
+using MessageBox = AdonisUI.Controls.MessageBox;
 
 
 namespace VRSuspender
@@ -26,7 +27,7 @@ namespace VRSuspender
     /// </summary>
     public partial class MainWindow : AdonisWindow
     {
-        private MainFormViewModel _mfvm;
+        private readonly MainFormViewModel _mfvm;
         public MainWindow()
         {
             InitializeComponent();
@@ -45,15 +46,28 @@ namespace VRSuspender
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            if(_mfvm.VrRunning)
+            {
+                if (MessageBox.Show("VR is currently running. Are you sure you want to close VRSuspender ? (Process will be restored to their initial state)", "Warning", AdonisUI.Controls.MessageBoxButton.YesNo, AdonisUI.Controls.MessageBoxImage.Warning) == AdonisUI.Controls.MessageBoxResult.No)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+                else
+                {
+                    _mfvm.ApplyStopVRActionToProcess();
+                }
+            }
+            
             if(_mfvm.IsMonitoring)
                 _mfvm.StopMonitoring();
+                                    
         }
 
- 
-        private void mnuNIQuit_Click(object sender, RoutedEventArgs e)
+        public void MnuNIQuit_Click(object sender, RoutedEventArgs e)
         {
-            _mfvm.StopMonitoring();
             Close();
         }
+
     }
 }

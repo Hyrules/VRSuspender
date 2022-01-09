@@ -40,8 +40,10 @@ namespace VRSuspender.EditProcessForm
 
         private void BrowseExecutable()
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Executable file (*.exe)|*.exe";
+            OpenFileDialog ofd = new()
+            {
+                Filter = "Executable file (*.exe)|*.exe"
+            };
             if (Path != string.Empty)
             {
                 ofd.FileName = System.IO.Path.GetFileName(Path);
@@ -79,9 +81,11 @@ namespace VRSuspender.EditProcessForm
 
         public TrackedProcess GetTrackedProcess()
         {
-            TrackedProcess process = new TrackedProcess();
-            process.Name = _name;
-            process.Path = _path;
+            TrackedProcess process = new()
+            {
+                Name = _name,
+                Path = _path
+            };
             switch (_action)
             {
                 case 0:
