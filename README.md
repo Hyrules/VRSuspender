@@ -21,9 +21,10 @@ Automatically detect SteamVR (vrmonitor.exe) and suspend/kill process that cause
 
 **How to use :**
 
-1. Start this application
-2. Start monitoring for SteamVR 
-3. Start SteamVR. 
+1. Download the latest release 
+2. Start this application
+3. Start monitoring for SteamVR 
+4. Start SteamVR. 
  
 If you have any monitored process in your list they will be suspended or killed. They will automatically resume after you exit SteamVR.
 You can either Suspend, Kill or keep Running the process.
