@@ -23,7 +23,7 @@ namespace VRSuspender
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             
-            MainWindow wnd = new MainWindow();
+            MainWindow wnd = new();
 
             switch (VRSuspender.Properties.Settings.Default.StartState)
             {
@@ -53,10 +53,11 @@ namespace VRSuspender
         private static void SetDropDownMenuToBeRightAligned()
         {
             var menuDropAlignmentField = typeof(SystemParameters).GetField("_menuDropAlignment", BindingFlags.NonPublic | BindingFlags.Static);
-            Action setAlignmentValue = () =>
+            
+            void setAlignmentValue()
             {
                 if (SystemParameters.MenuDropAlignment && menuDropAlignmentField != null) menuDropAlignmentField.SetValue(null, false);
-            };
+            }
 
             setAlignmentValue();
 

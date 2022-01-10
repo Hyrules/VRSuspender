@@ -63,7 +63,7 @@
                     <ComboBoxItem Content="Start Maximized"/>
                     <ComboBoxItem Content="Start to tray"/>
                 </ComboBox>
-                <MenuItem Name="nmuStartWithWindows" Header="Start with Windows" IsCheckable="True" IsChecked="{Binding StartWithWindows}" Command="{Binding SaveSettingsCommand}">
+                <MenuItem Name="nmuStartWithWindows" Header="Start with Windows" IsCheckable="True" IsChecked="{Binding StartWithWindows}" Command="{Binding StarWithWindowsCommand}">
 
                 </MenuItem>
                 <MenuItem Name="mntStartMonitorOnStartup" Header="Start monitoring on startup" IsCheckable="True" IsChecked="{Binding StartMonitoringOnStartup}" Command="{Binding SaveSettingsCommand}">
@@ -71,7 +71,7 @@
                 </MenuItem>
             </MenuItem>
             <MenuItem Name="mnuHelp" Header="Help">
-                <MenuItem Header="About"/>
+                <MenuItem Header="VR Suspender GitHub website" Command="{Binding OpenVRSuspenderWebsiteCommand}"/>
             </MenuItem>
         </Menu>
 
@@ -113,6 +113,19 @@
         </ListView>
         <StatusBar Grid.Row="4">
             <StatusBarItem Width="200" HorizontalAlignment="Left">
+                <iconPacks:PackIconForkAwesome Kind="Circle" Height="13" Foreground="Red">
+                    <iconPacks:PackIconForkAwesome.Style>
+                        <Style TargetType="iconPacks:PackIconForkAwesome">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding VrRunning}">
+                                    <Setter Property="Foreground" Value="Green"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </iconPacks:PackIconForkAwesome.Style>
+
+                </iconPacks:PackIconForkAwesome>
+
             </StatusBarItem>
         </StatusBar>
         <ToolBarTray Name="TbtToolbar" Height="42" Grid.Row="1" VerticalAlignment="Center" IsLocked="True">

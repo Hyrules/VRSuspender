@@ -163,11 +163,13 @@ namespace VRSuspender
             }
             if (p.Length > 0)
             {
+                int index = 1;
                 foreach (Process p2 in p)
                 {
-                    WriteToLog($"Resuming {p2.ProcessName}");
+                    WriteToLog($"Resuming {p2.ProcessName} [{index}/{p.Length}]");
                     p2.Resume();
                     process.Status = ProcessState.Running;
+                    index++;
                 }
             }
         }
@@ -223,7 +225,7 @@ namespace VRSuspender
                 }
                 catch (Exception)
                 {
-                    process.Icon = new BitmapImage(new Uri("/Resources/qm.png"));
+                    process.Icon = new BitmapImage(new Uri("pack://application,,,/Resources/qm.png"));
                 }
 
                 if(p[0].Threads[0].ThreadState == ThreadState.Wait)
@@ -251,7 +253,7 @@ namespace VRSuspender
                 }
                 else
                 {
-                    process.Icon = new BitmapImage(new Uri("/Resources/qm.png"));
+                    process.Icon = new BitmapImage(new Uri("pack://application,,,/Resources/qm.png"));
                     process.Status = ProcessState.NotFound;
 
                 }
@@ -284,11 +286,13 @@ namespace VRSuspender
             Process[] p = Process.GetProcessesByName(process.Name);
             if (p.Length > 0)
             {
+                int index = 1;
                 foreach (Process p2 in p)
                 {
-                    WriteToLog($"Terminating {p2.ProcessName}");
+                    WriteToLog($"Terminating {p2.ProcessName} [{index}/{p.Length}]");
                     p2.Kill();
                     p2.Close();
+                    index++;
                 }
             }
         }
@@ -304,13 +308,15 @@ namespace VRSuspender
             }
             if (p.Length > 0)
             {
+                int index = 1;
                 foreach (Process p2 in p)
                 {
                     if (p2.HasExited) continue;
                     
-                    WriteToLog($"Suspending {p2.ProcessName}");
+                    WriteToLog($"Suspending {p2.ProcessName} [{index}/{p.Length}]");
                     p2.Suspend();
                     process.Status = ProcessState.Suspended;
+                    index++;
                 }
 
             }
@@ -332,11 +338,41 @@ namespace VRSuspender
         public ICommand AddProcessCommand => new RelayCommand(param => AddProces());
         public ICommand SaveSettingsCommand => new RelayCommand(param => SaveSettings());
         public ICommand FilterMainViewCommand => new RelayCommand(param => RefreshFilter());
-        public ICommand ShowAboutWindowCommand => new RelayCommand(param => ShowAboutWindow());
+        public static ICommand OpenVRSuspenderWebsiteCommand => new RelayCommand(param => OpenVRSuspenderWebsite());
+        public ICommand StarWithWindowsCommand => new RelayCommand(param => SetStartWithWindows(StartWithWindows));
 
-        private void ShowAboutWindow()
+        private static void OpenVRSuspenderWebsite()
         {
-            
+            OpenBrowser("https://github.com/Hyrules/VRSuspender/");
+        }
+
+        // hack because of this: https://github.com/dotnet/corefx/issues/10361
+        public static void OpenBrowser(string url)
+        {
+            try
+            {
+                Process.Start(url);
+            }
+            catch
+            {              
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    url = url.Replace("&", "^&");
+                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    Process.Start("xdg-open", url);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    Process.Start("open", url);
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
 
         private void RefreshFilter()
@@ -375,7 +411,6 @@ namespace VRSuspender
            
             Properties.Settings.Default.StartState = StartState;
             Properties.Settings.Default.StartWithWindows = StartWithWindows;
-            SetStartWithWindows(StartWithWindows);
             Properties.Settings.Default.StartMonitorOnStartup = StartMonitoringOnStartup;
             Properties.Settings.Default.Save();
 
@@ -404,7 +439,7 @@ namespace VRSuspender
                 WriteToLog("VRSuspender has been removed from Windows startup applications.");
                 rkApp.DeleteValue("VRSuspender", false);
             }
-
+            SaveSettings();
         }
 
         private void AddProces()

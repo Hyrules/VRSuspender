@@ -17,7 +17,7 @@ namespace VRSuspender.Extensions
                 icon.Handle,
                 Int32Rect.Empty,
                 BitmapSizeOptions.FromEmptyOptions());
-
+            imageSource.Freeze();
             return imageSource;
         }
     }
