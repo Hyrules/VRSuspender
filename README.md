@@ -32,9 +32,6 @@ You can either Suspend, Kill or keep Running the process.
 
 Note: If you suspend a process with this app you won't be able to resume it from the task manager. There is no way in the task manager to suspend or resume process that has been suspended.
 
-**TODO:**
-- Add option to save process list
-
 **WARNING:**
 I do not offer any kind of warranty with this app and user is solely responsible for using the application and situations that might arise.
 I will not be responsible if you crash your computer or someone else because you killed or suspended a process you shouldn't have.
