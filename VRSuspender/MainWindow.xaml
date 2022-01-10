@@ -36,7 +36,7 @@
         </LinearGradientBrush>
     </adonisControls:AdonisWindow.TitleBarBackground>
     <adonisControls:AdonisWindow.DataContext>
-        <local:MainFormViewModel/>
+        <local:MainFormViewModel x:Name="mfvm"/>
     </adonisControls:AdonisWindow.DataContext>
     <Grid>
         <Grid.RowDefinitions>
@@ -115,12 +115,15 @@
         <StatusBar Grid.Row="4">
             <StatusBarItem Width="200" HorizontalAlignment="Left">
                 <WrapPanel>
-                    <iconPacks:PackIconForkAwesome Kind="Circle" Height="13" Foreground="Red">
+                    <iconPacks:PackIconForkAwesome Kind="Circle" Height="13">
                         <iconPacks:PackIconForkAwesome.Style>
                             <Style TargetType="iconPacks:PackIconForkAwesome">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding VrRunning}" Value="True">
-                                        <Setter Property="Foreground" Value="Green"/>
+                                        <Setter Property="Foreground" Value="Lime"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding VrRunning}" Value="False">
+                                        <Setter Property="Foreground" Value="Red"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>

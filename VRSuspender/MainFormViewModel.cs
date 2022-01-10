@@ -65,6 +65,20 @@ namespace VRSuspender
 
         public void StartMonitoring()
         {
+            // CHECK IF STEAMVR IS RUNNING AND APPLY THE PROFILES
+            Process[] p = Process.GetProcessesByName("vrserver");
+
+            if (p.Length > 0)
+            {
+                WriteToLog($"Steam VR is already running. Applying user profiles.");
+                ApplyStartVRActionToProcess();
+
+            }
+            else
+            {
+                WriteToLog("Waiting for SteamVR to start...");
+            }
+
             startWatch.EventArrived += new EventArrivedEventHandler(StartWatch_EventArrived);
             startWatch.Start();
 
@@ -72,7 +86,7 @@ namespace VRSuspender
             stopWatch.Start();
 
             IsMonitoring = true;
-            WriteToLog("Waiting for SteamVR to start...");
+            
         }
 
         public void StopMonitoring()
