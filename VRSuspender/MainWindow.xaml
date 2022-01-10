@@ -10,7 +10,7 @@
         xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
         xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
         mc:Ignorable="d"
-        Title="VR Suspender" Height="450" Width="800" ContentRendered="Window_ContentRendered" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="CanResize" IconVisibility="Visible" TitleVisibility="Visible">
+        Title="VR Suspender" Height="450" Width="800" ContentRendered="Window_ContentRendered" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="CanResize" IconVisibility="Visible" TitleVisibility="Visible" Background="#FF2A2B34" >
     <adonisControls:AdonisWindow.Resources>
         <Style x:Key="{x:Static ToolBar.ComboBoxStyleKey}" TargetType="{x:Type ComboBox}" BasedOn="{StaticResource {x:Type ComboBox}}" />
          <SolidColorBrush Color="#FFCFCFCF" x:Key="VRSuspenderToolBarButtons"/>
@@ -94,38 +94,41 @@
             </ListView.ContextMenu>
             <ListView.View >
                 <GridView>
-                    <GridViewColumn Header="Process Name" Width="150">
+                    <GridViewColumn Header="Profile Name" Width="150">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <WrapPanel>
                                     <Image Height="16" Source="{Binding Icon}"></Image>
                                     <TextBlock Text=" "/>
-                                    <TextBlock Text="{Binding Name}"/>
+                                    <TextBlock Text="{Binding ProfileName}"/>
                                 </WrapPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
+                    <GridViewColumn Header="Process Name" DisplayMemberBinding="{Binding ProcessName}" Width="100"/>
                     <GridViewColumn Header="Status" DisplayMemberBinding="{Binding Status}" Width="100"/>
                     <GridViewColumn Header="Action" DisplayMemberBinding="{Binding Action}" Width="100"/>
-                    <GridViewColumn Header="Path" DisplayMemberBinding="{Binding Path}" Width="400"/>
+                    <GridViewColumn Header="Path" DisplayMemberBinding="{Binding Path}" Width="300"/>
                 </GridView>
             </ListView.View>
         </ListView>
         <StatusBar Grid.Row="4">
             <StatusBarItem Width="200" HorizontalAlignment="Left">
-                <iconPacks:PackIconForkAwesome Kind="Circle" Height="13" Foreground="Red">
-                    <iconPacks:PackIconForkAwesome.Style>
-                        <Style TargetType="iconPacks:PackIconForkAwesome">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding VrRunning}">
-                                    <Setter Property="Foreground" Value="Green"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </iconPacks:PackIconForkAwesome.Style>
-
-                </iconPacks:PackIconForkAwesome>
-
+                <WrapPanel>
+                    <iconPacks:PackIconForkAwesome Kind="Circle" Height="13" Foreground="Red">
+                        <iconPacks:PackIconForkAwesome.Style>
+                            <Style TargetType="iconPacks:PackIconForkAwesome">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding VrRunning}" Value="True">
+                                        <Setter Property="Foreground" Value="Green"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </iconPacks:PackIconForkAwesome.Style>
+                    
+                    </iconPacks:PackIconForkAwesome>
+                    <Label Content="  VR Running Status"/>
+                </WrapPanel>
             </StatusBarItem>
         </StatusBar>
         <ToolBarTray Name="TbtToolbar" Height="42" Grid.Row="1" VerticalAlignment="Center" IsLocked="True">

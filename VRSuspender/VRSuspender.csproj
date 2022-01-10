@@ -64,17 +64,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Profiles\EK-Connect.vrs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Profiles\iCUE.vrs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Profiles\msedge.vrs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Profiles\SamsungMagician.vrs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Update="profilesdb.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

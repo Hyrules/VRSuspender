@@ -19,7 +19,6 @@ using AdonisUI;
 using AdonisUI.Controls;
 using MessageBox = AdonisUI.Controls.MessageBox;
 
-
 namespace VRSuspender
 {
     /// <summary>
@@ -40,8 +39,6 @@ namespace VRSuspender
         {
             if(Properties.Settings.Default.StartMonitorOnStartup)
                 _mfvm.StartMonitoring();
-          
-            
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

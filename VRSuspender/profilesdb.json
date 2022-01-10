@@ -1,0 +1,26 @@
+[
+  {
+    "profilename":  "EK Connect",
+    "processname": "EK-Connect",
+    "action": "Suspend",
+    "Path": "C:\\Program Files\\EKWB\\EK Connect\\EK-Connect.exe"
+  },
+  {
+    "profilename":  "ICUE",
+    "processname": "iCUE",
+    "action": "Suspend",
+    "path": "C:\\Program Files\\Corsair\\CORSAIR iCUE 4 Software\\iCUE.exe"
+  },
+  {
+    "profilename":  "Microsoft Edge",
+    "processname": "msedge",
+    "action": "Suspend",
+    "path": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+  },
+  {
+    "profilename":  "Samsung Magician",
+    "processname": "SamsungMagician",
+    "action": "Suspend",
+    "path": "C:\\Program Files (x86)\\Samsung\\Samsung Magician\\SamsungMagician.exe"
+  }
+]

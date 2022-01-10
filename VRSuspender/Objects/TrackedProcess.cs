@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Media;
 using VRSuspender.Utils;
+using VRSuspender.Utils.Validations;
 
 namespace VRSuspender
 {
@@ -15,7 +16,8 @@ namespace VRSuspender
     {
 
 
-        private string _name;
+        private string _profileName;
+        private string _processName;
         private ProcessState _status;
         private string _path;
         private ProcessAction _action;
@@ -23,44 +25,52 @@ namespace VRSuspender
 
         public TrackedProcess()
         {
-            _name = string.Empty;
+            _profileName = string.Empty;
+            _processName = string.Empty;
             _status = ProcessState.Unknown;
             _path = string.Empty;
             _action = ProcessAction.Suspend;
             Icon = null;
         }
 
-        public TrackedProcess(string name) : this()
+        public TrackedProcess(string profilename) : this()
         {         
-            Name = name;
+            ProfileName = profilename;
         }
 
-        public TrackedProcess(string name, ProcessState status) :this(name)
-        {            
+        public TrackedProcess(string profilename, string processname): this(profilename)
+        {
+            ProcessName = processname;
+        }
+
+        public TrackedProcess(string profilename, string processname, ProcessState status) :this(profilename, processname)
+        {
             Status = status;
         }
 
-        public TrackedProcess(string name, ProcessState status, string path) : this(name,status)
+        public TrackedProcess(string profilename, string processname, ProcessState status, string path) : this(profilename, processname, status)
         {
             Path = path;
         }
 
-        public TrackedProcess(string name, ProcessState status, string path, ProcessAction action) : this(name,status,path)
+        public TrackedProcess(string profilename, string processname, ProcessState status, string path, ProcessAction action) : this(profilename, processname, status, path)
         {
             Action = action;
         }
 
-        public TrackedProcess(string name, ProcessAction action)
+        public TrackedProcess(string profilename, ProcessAction action)
         {
-            Name = name;
+            ProfileName = profilename;
+            ProcessName = string.Empty;
             Action = action;
             Path = string.Empty;
+            ProcessName = string.Empty;
         }
 
-        public string Name 
+        public string ProfileName 
         { 
-            get => _name;
-            set => SetProperty(ref _name, value);
+            get => _profileName;
+            set => SetProperty(ref _profileName, value);
         }
 
         [JsonIgnore]
@@ -69,12 +79,14 @@ namespace VRSuspender
             get => _status; 
             set => SetProperty(ref _status,value); 
         }
+
         public string Path
         { 
             get => _path;
             set => SetProperty(ref _path, value);
 
         }
+
         [JsonConverter(typeof(ProcessActionConverter))]
         public ProcessAction Action
         { 
@@ -87,6 +99,12 @@ namespace VRSuspender
         { 
             get => _icon; 
             set => SetProperty(ref _icon,value); 
+        }
+
+        public string ProcessName 
+        { 
+            get => _processName; 
+            set => SetProperty(ref _processName,value); 
         }
     }
 

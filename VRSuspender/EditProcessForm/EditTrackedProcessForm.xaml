@@ -4,10 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VRSuspender.EditProcessForm"
+        xmlns:vr="clr-namespace:VRSuspender"
         xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+        xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
         xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
-        Title="Edit / Add A Process to Track..." Height="203" Width="422" WindowStartupLocation="CenterOwner" WindowStyle="SingleBorderWindow">
+        Title="Edit / Add A Process to Track..." Height="221" Width="422" WindowStartupLocation="CenterOwner" WindowStyle="SingleBorderWindow" Background="#FF2A2B34">
     <adonisControls:AdonisWindow.DataContext>
         <local:EditTrackedProcessFormViewModel/>
     </adonisControls:AdonisWindow.DataContext>
@@ -17,20 +20,46 @@
             <GradientStop Color="Black" Offset="1"/>
         </LinearGradientBrush>
     </adonisControls:AdonisWindow.TitleBarBackground>
+    <adonisControls:AdonisWindow.Resources>
+        <Style x:Key="BtnAdd" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Static adonisUi:Styles.AccentButton}}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=tbProcessName, Path=(Validation.HasError)}" Value="True">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ElementName=tbPath, Path=(Validation.HasError)}" Value="True">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ElementName=tbProfileName, Path=(Validation.HasError)}" Value="True">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+
+            </Style.Triggers>
+        </Style>
+    </adonisControls:AdonisWindow.Resources>
     <Grid>
-        <Label Content="Process Name"  Margin="17,25,0,0" VerticalAlignment="Top"/>
-        <TextBox Name="tbName" Margin="0,21,0,0" TextWrapping="Wrap" Text="{Binding Name}" VerticalAlignment="Top" Width="218"/>
-        <Button Content="Browse..." Margin="324,22,0,0" VerticalAlignment="Top" Width="66" Command="{Binding BrowseExecutableCommand}"/>
-        <ComboBox HorizontalAlignment="Left" Margin="102,71,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="{Binding Action}">
-            <ComboBoxItem Content="Suspend"/>
-            <ComboBoxItem Content="Kill"/>
-            <ComboBoxItem Content="Keep Running"/>
+        <Label Content="Process Name"  Margin="17,88,0,0" VerticalAlignment="Top"/>
+        <TextBox Name="tbProcessName" HorizontalAlignment="Left" Margin="103,84,0,0" TextWrapping="Wrap" Text="{Binding ProcessName, ValidatesOnDataErrors=True, NotifyOnValidationError=True,UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Width="218" Height="23" ToolTip="Name of the process. Normally name of the exe without the extension (exe)"/>
+        <Button Content="Browse..." Margin="325,110,31,0" VerticalAlignment="Top" Width="66" Command="{Binding BrowseExecutableCommand}"/>
+        <ComboBox HorizontalAlignment="Left" Margin="103,135,0,0" VerticalAlignment="Top" Width="120" SelectedValuePath="Tag" SelectedValue="{Binding Action}" ToolTip="Action to do when process is running.">
+            <ComboBoxItem Content="Suspend" Tag="{x:Static vr:ProcessAction.Suspend}"/>
+            <ComboBoxItem Content="Kill" Tag="{x:Static vr:ProcessAction.Kill}"/>
+            <ComboBoxItem Content="Keep Running" Tag="{x:Static vr:ProcessAction.KeepRunning}"/>
         </ComboBox>
-        <Label Content="Action" HorizontalAlignment="Left" Margin="17,74,0,0" VerticalAlignment="Top"/>
-        <Button Name="btnSave" Content="Save" HorizontalAlignment="Left" Margin="290,123,0,0" VerticalAlignment="Top" Width="47" Click="BtnSave_Click" />
-        <Button Name="btnCancel" Content="Cancel" HorizontalAlignment="Left" Margin="342,123,0,0" VerticalAlignment="Top" Width="48" Click="BtnCancel_Click"/>
-        <Label Content="Process Path" HorizontalAlignment="Left" Margin="17,50,0,0" VerticalAlignment="Top"/>
-        <TextBox Name="tbPath" HorizontalAlignment="Center" Margin="0,46,0,0" TextWrapping="NoWrap" Text="{Binding Path}" IsReadOnly="True" VerticalAlignment="Top" Width="218"/>
+        <Label Content="Action" HorizontalAlignment="Left" Margin="17,139,0,0" VerticalAlignment="Top"/>
+        <Button Name="btnSave" Content="Add" HorizontalAlignment="Left" Margin="290,150,0,0" VerticalAlignment="Top" Width="47" Click="BtnSave_Click" Style="{StaticResource BtnAdd}" />
+        <Button Name="btnCancel" Content="Cancel" HorizontalAlignment="Left" Margin="342,150,0,0" VerticalAlignment="Top" Width="48" Click="BtnCancel_Click"/>
+        <Label Content="Process Path" HorizontalAlignment="Left" Margin="17,113,0,0" VerticalAlignment="Top"/>
+        <TextBox Name="tbPath" HorizontalAlignment="Left" TextWrapping="NoWrap" Text="{Binding Path, ValidatesOnDataErrors=True, NotifyOnValidationError=True,UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Width="218" Margin="103,109,0,0" ToolTip="Path to the executable file."/>
+        <ComboBox HorizontalAlignment="Center" Margin="0,25,0,0" VerticalAlignment="Top" Width="218" ItemsSource="{Binding ListProfiles}" DisplayMemberPath="ProfileName" SelectedItem="{Binding SelectedProfile}" Height="23">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="SelectionChanged">
+                    <i:InvokeCommandAction Command="{Binding ProfileSelectionChangedCommand}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </ComboBox>
+        <Label Content="Profiles" HorizontalAlignment="Left" Margin="17,29,0,0" VerticalAlignment="Top"/>
+        <Label Content="Profile Name" HorizontalAlignment="Left" Margin="17,63,0,0" VerticalAlignment="Top"/>
+        <TextBox Name="tbProfileName" HorizontalAlignment="Left" Margin="103,59,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="218" Text="{Binding ProfileName, ValidatesOnDataErrors=True, NotifyOnValidationError=True,UpdateSourceTrigger=PropertyChanged}" adonisExtensions:ValidationExtension.IsErrorMessageVisibleOnFocus="True" adonisExtensions:ValidationExtension.IsErrorMessageVisibleOnMouseOver="True" ToolTip="Name of the profile. Can be anything you want."/>
 
     </Grid>
 </adonisControls:AdonisWindow>
