@@ -42,6 +42,8 @@ namespace VRSuspender
         private bool _closeToTray;
         private CollectionView _view;
         private bool _vrRunning = false;
+        private bool _logVisible = true;
+        private string _lastLogMessage;
 
         public MainFormViewModel()
         {
@@ -372,13 +374,18 @@ namespace VRSuspender
                     WriteToLog($"Looking for profile {profile.ProfileName}...");
                     if (File.Exists(profile.Path))
                     {
-                        WriteToLog($"Profile found adding to tracked process.");
+                        
                         if (!ListTrackedProcess.Any(x => x.ProfileName == profile.ProfileName && x.ProcessName == profile.ProcessName))
                         {
+                            WriteToLog($"Profile found adding to process list.");
                             App.Current.Dispatcher.Invoke(() => {
                                 ListTrackedProcess.Add(profile);
                             });
                                                 
+                        }
+                        else
+                        {
+                            WriteToLog($"Profile {profile.ProfileName} already loaded. Ignoring.");
                         }
                     }
                 }
@@ -604,7 +611,11 @@ namespace VRSuspender
 
         private void WriteToLog(string message)
         {
-            Application.Current.Dispatcher.BeginInvoke(new Action(() => Log.Insert(0,$"[{DateTime.Now}] - {message}.")));
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+                string msg = $"[{DateTime.Now}] - {message}.";
+                Log.Insert(0, msg);
+                LastLogMessage = msg;
+                }));
         }
 
         #region PROPERTIES
@@ -621,6 +632,8 @@ namespace VRSuspender
         public bool VrRunning { get => _vrRunning; private set => SetProperty(ref _vrRunning,value); }
         public bool MinimizeToTray { get => _minimizeToTray; set => SetProperty(ref _minimizeToTray,value); }
         public bool CloseToTray { get => _closeToTray; set => SetProperty(ref _closeToTray,value); }
+        public bool LogVisible { get => _logVisible; set => SetProperty(ref _logVisible,value); }
+        public string LastLogMessage { get => _lastLogMessage; private set => SetProperty(ref _lastLogMessage,value); }
         #endregion
     }
 

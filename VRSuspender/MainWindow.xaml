@@ -10,10 +10,10 @@
         xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
         xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
         mc:Ignorable="d"
-        Title="VR Suspender" Height="450" Width="800" ContentRendered="Window_ContentRendered" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="CanResize" IconVisibility="Visible" TitleVisibility="Visible" Background="#FF2A2B34" StateChanged="AdonisWindow_StateChanged" Loaded="AdonisWindow_Loaded" >
+        Title="VR Suspender" Height="450" Width="800" ContentRendered="Window_ContentRendered" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="CanResize" IconVisibility="Visible" TitleVisibility="Visible" Background="#FF2A2B34" StateChanged="AdonisWindow_StateChanged" >
     <adonisControls:AdonisWindow.Resources>
         <Style x:Key="{x:Static ToolBar.ComboBoxStyleKey}" TargetType="{x:Type ComboBox}" BasedOn="{StaticResource {x:Type ComboBox}}" />
-         <SolidColorBrush Color="#FFCFCFCF" x:Key="VRSuspenderToolBarButtons"/>
+        <SolidColorBrush Color="#FFCFCFCF" x:Key="VRSuspenderToolBarButtons"/>
         <Style x:Key="ImageEnabled" TargetType="Image">
             <Style.Triggers>
                 <Trigger Property="IsEnabled" Value="False">
@@ -21,7 +21,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-      
+
         <ContextMenu x:Key="NotifyIconMenu">
             <MenuItem Name="mnuNIStartMonitoring" Header="Start Monitoring" Command="{Binding StartMonitoringCommand}"/>
             <MenuItem Name="mnuNIStopMonitoring" Header="Stop Monitoring" Command="{Binding StopMonitoringCommand}"/>
@@ -43,6 +43,7 @@
             <RowDefinition Height="24"/>
             <RowDefinition Height="42"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="5"/>
             <RowDefinition Height="*" MinHeight="100" MaxHeight="250"/>
             <RowDefinition Height="22"/>
         </Grid.RowDefinitions>
@@ -72,66 +73,6 @@
                 <MenuItem Header="VR Suspender GitHub website" Command="{Binding OpenVRSuspenderWebsiteCommand}"/>
             </MenuItem>
         </Menu>
-
-        <ListBox Name="lbLog" ItemsSource="{Binding Log, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" ScrollViewer.CanContentScroll="True" Grid.Row="3">
-        </ListBox>
-        <ListView Name="lvTrackedProcess" ItemsSource="{Binding ListTrackedProcess, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" SelectedItem="{Binding SelectedTrackedProcess}" Grid.Row="2" Background="#FF4A4A5E" >
-            <ListView.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Edit..." Command="{Binding EditCommand}"/>
-                    <Separator></Separator>
-                    <MenuItem Header="Suspend" Command="{Binding SuspendProcessCommand}"/>
-                    <MenuItem Header="Resume" Command="{Binding ResumeProcessCommand}"/>
-                    <MenuItem Header="Kill" Command="{Binding KillProcessCommand}"/>
-                    <Separator/>
-                    <MenuItem Header="Refresh" Command="{Binding RefreshProcessCommand}"/>
-                    <MenuItem Header="Refresh all" Command="{Binding RefreshAllProcessCommand}"/>
-                    <Separator/>
-                    <MenuItem Header="Delete" Command="{Binding DeleteProcessCommand}"/>
-                </ContextMenu>
-            </ListView.ContextMenu>
-            <ListView.View >
-                <GridView>
-                    <GridViewColumn Header="Profile Name" Width="150">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <WrapPanel>
-                                    <Image Height="16" Source="{Binding Icon}"></Image>
-                                    <TextBlock Text=" "/>
-                                    <TextBlock Text="{Binding ProfileName}"/>
-                                </WrapPanel>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Process Name" DisplayMemberBinding="{Binding ProcessName}" Width="100"/>
-                    <GridViewColumn Header="Status" DisplayMemberBinding="{Binding Status}" Width="100"/>
-                    <GridViewColumn Header="Action" DisplayMemberBinding="{Binding Action}" Width="100"/>
-                    <GridViewColumn Header="Path" DisplayMemberBinding="{Binding Path}" Width="300"/>
-                </GridView>
-            </ListView.View>
-        </ListView>
-        <StatusBar Grid.Row="4">
-            <StatusBarItem Width="200" HorizontalAlignment="Left">
-                <WrapPanel>
-                    <iconPacks:PackIconForkAwesome Kind="Circle" Height="13">
-                        <iconPacks:PackIconForkAwesome.Style>
-                            <Style TargetType="iconPacks:PackIconForkAwesome">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding VrRunning}" Value="True">
-                                        <Setter Property="Foreground" Value="Lime"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding VrRunning}" Value="False">
-                                        <Setter Property="Foreground" Value="Red"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </iconPacks:PackIconForkAwesome.Style>
-                    
-                    </iconPacks:PackIconForkAwesome>
-                    <Label Content="  VR Running Status"/>
-                </WrapPanel>
-            </StatusBarItem>
-        </StatusBar>
         <ToolBarTray Name="TbtToolbar" Height="42" Grid.Row="1" VerticalAlignment="Center" IsLocked="True">
             <ToolBar Height="42">
                 <Button Height="32" ToolTip="Start Monitoring for SteamVR" Command="{Binding StartMonitoringCommand}">
@@ -186,5 +127,70 @@
                 </ComboBox>
             </ToolBar>
         </ToolBarTray>
+        <ListView Name="lvTrackedProcess" ItemsSource="{Binding ListTrackedProcess, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" SelectedItem="{Binding SelectedTrackedProcess}" Grid.Row="2" Background="#FF4A4A5E" >
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Edit..." Command="{Binding EditCommand}"/>
+                    <Separator></Separator>
+                    <MenuItem Header="Suspend" Command="{Binding SuspendProcessCommand}"/>
+                    <MenuItem Header="Resume" Command="{Binding ResumeProcessCommand}"/>
+                    <MenuItem Header="Kill" Command="{Binding KillProcessCommand}"/>
+                    <Separator/>
+                    <MenuItem Header="Refresh" Command="{Binding RefreshProcessCommand}"/>
+                    <MenuItem Header="Refresh all" Command="{Binding RefreshAllProcessCommand}"/>
+                    <Separator/>
+                    <MenuItem Header="Delete" Command="{Binding DeleteProcessCommand}"/>
+                </ContextMenu>
+            </ListView.ContextMenu>
+            <ListView.View >
+                <GridView>
+                    <GridViewColumn Header="Profile Name" Width="150">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <WrapPanel>
+                                    <Image Height="16" Source="{Binding Icon}"></Image>
+                                    <TextBlock Text=" "/>
+                                    <TextBlock Text="{Binding ProfileName}"/>
+                                </WrapPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Process Name" DisplayMemberBinding="{Binding ProcessName}" Width="100"/>
+                    <GridViewColumn Header="Status" DisplayMemberBinding="{Binding Status}" Width="100"/>
+                    <GridViewColumn Header="Action" DisplayMemberBinding="{Binding Action}" Width="100"/>
+                    <GridViewColumn Header="Path" DisplayMemberBinding="{Binding Path}" Width="300"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <GridSplitter Grid.Row="3" Height="5" HorizontalAlignment="Stretch" Background="#FF4A4A5E"/>
+        <ListBox Name="lbLog" ItemsSource="{Binding Log, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" ScrollViewer.CanContentScroll="True" Grid.Row="4">
+        </ListBox>
+        <StatusBar Grid.Row="5">
+            <StatusBarItem Width="200" HorizontalAlignment="Left">
+                <WrapPanel>
+                    <iconPacks:PackIconForkAwesome Kind="Circle" Height="13">
+                        <iconPacks:PackIconForkAwesome.Style>
+                            <Style TargetType="iconPacks:PackIconForkAwesome">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding VrRunning}" Value="True">
+                                        <Setter Property="Foreground" Value="Lime"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding VrRunning}" Value="False">
+                                        <Setter Property="Foreground" Value="Red"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </iconPacks:PackIconForkAwesome.Style>
+
+                    </iconPacks:PackIconForkAwesome>
+                    <Label Content="  VR Running Status"/>
+                </WrapPanel>
+            </StatusBarItem>
+            <Separator/>
+            <StatusBarItem Width="Auto">
+                <TextBlock Text="{Binding LastLogMessage}" />
+            </StatusBarItem>
+        </StatusBar>
+ 
     </Grid>
 </adonisControls:AdonisWindow>
