@@ -21,6 +21,7 @@ using Newtonsoft.Json;
 using System.Windows.Data;
 using Microsoft.Win32;
 using Windows.Storage;
+using VRSuspender.Objects;
 
 namespace VRSuspender
 {
@@ -55,11 +56,13 @@ namespace VRSuspender
             _listTrackedProcess = new ObservableCollection<TrackedProcess>();
             LoadTrackedProcessProfiles();
             IsMonitoring = false;
-            RefreshProcess();
-
-
         }
        
+        public async Task Initialize()
+        {
+            await RefreshProcess();
+        }
+
         public void SetCollectionViewItemSource(System.Collections.IEnumerable source)
         {
             _view = (CollectionView)CollectionViewSource.GetDefaultView(source);
@@ -110,10 +113,10 @@ namespace VRSuspender
             ApplyStartVRActionToProcess();
         }
 
-        public void ApplyStartVRActionToProcess()
+        public async void ApplyStartVRActionToProcess()
         {
             if (VrRunning) return;
-            RefreshProcess();
+            await RefreshProcess();
             foreach (TrackedProcess s in _listTrackedProcess)
             {
                 switch (s.Action)
@@ -136,16 +139,16 @@ namespace VRSuspender
             VrRunning = true;
         }
 
-        void StopWatch_EventArrived(object sender, EventArrivedEventArgs e)
+        async void StopWatch_EventArrived(object sender, EventArrivedEventArgs e)
         {
             WriteToLog(e.NewEvent.Properties["ProcessName"].Value + " Stopped.");
-            ApplyStopVRActionToProcess();
+            await ApplyStopVRActionToProcess();
 
         }
-        public void ApplyStopVRActionToProcess()
+        public async Task ApplyStopVRActionToProcess()
         {
             if(!VrRunning) return;
-            RefreshProcess();
+            await RefreshProcess();
             foreach (TrackedProcess s in _listTrackedProcess)
             {
                 switch (s.Action)
@@ -224,58 +227,60 @@ namespace VRSuspender
             }
         }
 
-        private static void RefreshProcess(TrackedProcess process)
+        private static async Task RefreshProcess(TrackedProcess process)
         {
-            Process[] p = Process.GetProcessesByName(process.ProcessName);
-            if (p.Length > 0)
+            await Task.Run(() =>
             {
-                try
+                Process[] p = Process.GetProcessesByName(process.ProcessName);
+                if (p.Length > 0)
                 {
-                    process.Icon = Icon.ExtractAssociatedIcon(p[0].MainModule.FileName).ToImageSource();
-                }
-                catch (Exception)
-                {
-                    process.Icon = new BitmapImage(new Uri("/Resources/qm.png"));
-                }
-
-                if(p[0].Threads[0].ThreadState == ThreadState.Wait)
-                {
-                    if(p[0].Threads[0].WaitReason == ThreadWaitReason.Suspended)
+                    try
                     {
-                        process.Status = ProcessState.Suspended;
+                        process.Icon = Icon.ExtractAssociatedIcon(p[0].MainModule.FileName).ToImageSource();
+                    }
+                    catch (Exception)
+                    {
+                        process.Icon = new BitmapImage(new Uri("/Resources/qm.png"));
+                    }
+
+                    if (p[0].Threads[0].ThreadState == ThreadState.Wait)
+                    {
+                        if (p[0].Threads[0].WaitReason == ThreadWaitReason.Suspended)
+                        {
+                            process.Status = ProcessState.Suspended;
+                        }
+                        else
+                        {
+                            process.Status = ProcessState.Running;
+                        }
                     }
                     else
                     {
                         process.Status = ProcessState.Running;
                     }
+                    process.Path = p[0].MainModule.FileName;
                 }
                 else
                 {
-                    process.Status = ProcessState.Running;
-                }
-                process.Path = p[0].MainModule.FileName;
-            }
-            else
-            {
-                if(!string.IsNullOrEmpty(process.Path) && File.Exists(process.Path))
-                {
-                    process.Icon = Icon.ExtractAssociatedIcon(process.Path).ToImageSource();
-                }
-                else
-                {
-                    process.Icon = new BitmapImage(new Uri("/Resources/qm.png"));
-                    process.Status = ProcessState.NotFound;
+                    if (!string.IsNullOrEmpty(process.Path) && File.Exists(process.Path))
+                    {
+                        process.Icon = Icon.ExtractAssociatedIcon(process.Path).ToImageSource();
+                    }
+                    else
+                    {
+                        process.Icon = new BitmapImage(new Uri("/Resources/qm.png"));
+                        process.Status = ProcessState.NotFound;
 
+                    }
                 }
-            }
-    
+            });
         }
 
-        private void RefreshProcess()
+        private async Task RefreshProcess()
         {
             foreach (TrackedProcess process in _listTrackedProcess)
             {
-                RefreshProcess(process);
+                await RefreshProcess(process);
             }
         }
 
@@ -342,16 +347,46 @@ namespace VRSuspender
         public ICommand ResumeProcessCommand => new RelayCommand(param => ResumeProcess(SelectedTrackedProcess), param => CanResumeProcess());
         public ICommand SuspendProcessCommand => new RelayCommand(param => SuspendProcess(SelectedTrackedProcess), param => CanSuspendedProcess());
         public ICommand KillProcessCommand => new RelayCommand(param => KillProcess(SelectedTrackedProcess, false), param => CanKillProcess());
-        public ICommand RefreshProcessCommand => new RelayCommand(param => RefreshProcess(SelectedTrackedProcess), param => CanRefreshProcess());
-        public ICommand RefreshAllProcessCommand => new RelayCommand(param => RefreshProcess());
+        public ICommand RefreshProcessCommand => new AsyncRelayCommand(param => RefreshProcess(SelectedTrackedProcess), param => CanRefreshProcess());
+        public ICommand RefreshAllProcessCommand => new AsyncRelayCommand(param => RefreshProcess());
         public ICommand EditProcessCommand => new RelayCommand(param => EditProcess(), param => CanEditProcess());
-        public ICommand AddProcessCommand => new RelayCommand(param => AddProces(), param => CanAddProcess());
-
+        public ICommand AddProcessCommand => new AsyncRelayCommand(param => AddProces(), param => CanAddProcess());
         public ICommand SaveSettingsCommand => new RelayCommand(param => SaveSettings());
         public ICommand FilterMainViewCommand => new RelayCommand(param => RefreshFilter());
         public static ICommand OpenVRSuspenderWebsiteCommand => new RelayCommand(param => OpenVRSuspenderWebsite());
         public ICommand StarWithWindowsCommand => new RelayCommand(param => SetStartWithWindows(StartWithWindows));
 
+        public ICommand AutoDetectProcessCommand => new AsyncRelayCommand(param => AutoDetectProcess(), param => CanAutoDetectProcess());
+
+        private bool CanAutoDetectProcess()
+        {
+            return VrRunning == false;
+        }
+
+        private async Task AutoDetectProcess()
+        {
+            await Task.Run(() =>
+            {
+                foreach (TrackedProcess profile in ProfileDBManager.ListProfiles)
+                {
+                    WriteToLog($"Looking for profile {profile.ProfileName}...");
+                    if (File.Exists(profile.Path))
+                    {
+                        WriteToLog($"Profile found adding to tracked process.");
+                        if (!ListTrackedProcess.Any(x => x.ProfileName == profile.ProfileName && x.ProcessName == profile.ProcessName))
+                        {
+                            App.Current.Dispatcher.Invoke(() => {
+                                ListTrackedProcess.Add(profile);
+                            });
+                                                
+                        }
+                    }
+                }
+                
+            });
+            await RefreshProcess();
+            SaveUserProcessList();
+        }
 
         private bool CanAddProcess()
         {
@@ -462,7 +497,7 @@ namespace VRSuspender
             SaveSettings();
         }
 
-        private void AddProces()
+        private async Task AddProces()
         {
             EditTrackedProcessForm ProcessEditor = new()
             {
@@ -471,7 +506,7 @@ namespace VRSuspender
             if (ProcessEditor.ShowDialog() == true)
             {
                 TrackedProcess ntp = ProcessEditor.GetTrackedProcess();
-                RefreshProcess(ntp);
+                await RefreshProcess(ntp);
                 ListTrackedProcess.Add(ntp);
                 SaveUserProcessList();
             }

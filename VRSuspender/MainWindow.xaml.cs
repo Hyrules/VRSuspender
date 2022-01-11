@@ -40,6 +40,7 @@ namespace VRSuspender
         {
             if(Properties.Settings.Default.StartMonitorOnStartup)
                 _mfvm.StartMonitoring();
+
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -60,7 +61,7 @@ namespace VRSuspender
                 }
                 else
                 {
-                    _mfvm.ApplyStopVRActionToProcess();
+                    _mfvm.ApplyStopVRActionToProcess().RunSynchronously();
                 }
             }
             
@@ -84,6 +85,11 @@ namespace VRSuspender
                     this.Hide();
                 }
             }
+        }
+
+        private async void AdonisWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            await _mfvm.Initialize();
         }
     }
 }

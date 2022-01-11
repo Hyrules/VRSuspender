@@ -12,6 +12,7 @@ using MessageBox = AdonisUI.Controls.MessageBox;
 using System.Windows.Controls;
 using System.Windows;
 using VRSuspender.Utils.Validations;
+using VRSuspender.Objects;
 
 namespace VRSuspender.EditProcessForm
 {
@@ -28,9 +29,9 @@ namespace VRSuspender.EditProcessForm
         public EditTrackedProcessFormViewModel()
         {
             _path = string.Empty;
-           
-            LoadProfiles();
-            TrackedProcess _customprocess = new TrackedProcess() { ProfileName = "(Custom)", Action = ProcessAction.Suspend };
+
+            ListProfiles = ProfileDBManager.ListProfiles;
+            TrackedProcess _customprocess = new() { ProfileName = "(Custom)", Action = ProcessAction.Suspend };
             _listProfiles.Insert(0,_customprocess);
             SelectedProfile = _customprocess;
         }
@@ -69,24 +70,6 @@ namespace VRSuspender.EditProcessForm
         
         [NotNullOrEmptyOrWhiteSpaceValidation(ErrorMessage = "This field cannot be empty, null or whitespaces.")]
         public string ProfileName { get => _profileName; set => SetProperty(ref _profileName,value); }
-
-        private void LoadProfiles()
-        {
-            string path = System.IO.Path.GetDirectoryName(Environment.ProcessPath);
-            try
-            {
-                StreamReader sr = new(path + "\\profilesdb.json");
-                string json = sr.ReadToEnd();
-                ListProfiles = JsonConvert.DeserializeObject<List<TrackedProcess>>(json);
-            }
-            catch (Exception)
-            {
-                _listProfiles = new List<TrackedProcess>();
-                MessageBox.Show("Profile database not found.", "Error", AdonisUI.Controls.MessageBoxButton.OK, AdonisUI.Controls.MessageBoxImage.Error);
-            }
-
-
-        }
 
         private void BrowseExecutable()
         {

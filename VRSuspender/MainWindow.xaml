@@ -10,7 +10,7 @@
         xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
         xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
         mc:Ignorable="d"
-        Title="VR Suspender" Height="450" Width="800" ContentRendered="Window_ContentRendered" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="CanResize" IconVisibility="Visible" TitleVisibility="Visible" Background="#FF2A2B34" StateChanged="AdonisWindow_StateChanged" >
+        Title="VR Suspender" Height="450" Width="800" ContentRendered="Window_ContentRendered" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="CanResize" IconVisibility="Visible" TitleVisibility="Visible" Background="#FF2A2B34" StateChanged="AdonisWindow_StateChanged" Loaded="AdonisWindow_Loaded" >
     <adonisControls:AdonisWindow.Resources>
         <Style x:Key="{x:Static ToolBar.ComboBoxStyleKey}" TargetType="{x:Type ComboBox}" BasedOn="{StaticResource {x:Type ComboBox}}" />
          <SolidColorBrush Color="#FFCFCFCF" x:Key="VRSuspenderToolBarButtons"/>
@@ -133,7 +133,7 @@
             </StatusBarItem>
         </StatusBar>
         <ToolBarTray Name="TbtToolbar" Height="42" Grid.Row="1" VerticalAlignment="Center" IsLocked="True">
-            <ToolBar Height="42" Width="{Binding ElementName=TbtToolbar, Path=ActualWidth}">
+            <ToolBar Height="42">
                 <Button Height="32" ToolTip="Start Monitoring for SteamVR" Command="{Binding StartMonitoringCommand}">
                     <Image Height="20" Source="{iconPacks:ForkAwesomeImage Kind=Play, Brush={StaticResource VRSuspenderToolBarButtons}}" Style="{StaticResource ImageEnabled}"/>
                 </Button>
@@ -168,6 +168,11 @@
                     <Image Height="20" Source="{iconPacks:FontAwesomeImage Kind=SyncSolid, Brush={StaticResource VRSuspenderToolBarButtons}}" Style="{StaticResource ImageEnabled}"/>
                 </Button>
                 <Separator/>
+                <Button Height="32" ToolTip="Auto detect process that might interfere and add them to the tracked process list" Command="{Binding AutoDetectProcessCommand}" >
+                    <Image Height="20" Source="{iconPacks:ForkAwesomeImage Kind=Binoculars, Brush={StaticResource VRSuspenderToolBarButtons}}" Style="{StaticResource ImageEnabled}"/>
+                </Button>
+            </ToolBar>
+            <ToolBar>
                 <ComboBox Name="cbFilter" Width="120" SelectedIndex="{Binding SelectedFilterIndex}">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="SelectionChanged">
