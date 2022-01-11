@@ -27,12 +27,13 @@ namespace VRSuspender
     public partial class MainWindow : AdonisWindow
     {
         private readonly MainFormViewModel _mfvm;
+        private bool _closingFromMenu;
         public MainWindow()
         {
             InitializeComponent();
             _mfvm = DataContext as MainFormViewModel;
             _mfvm.SetCollectionViewItemSource(lvTrackedProcess.ItemsSource);
-
+            _closingFromMenu = false;
         }
 
         private void Window_ContentRendered(object sender, EventArgs e)
@@ -43,6 +44,13 @@ namespace VRSuspender
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            if(Properties.Settings.Default.CloseToTray && !_closingFromMenu)
+            {
+                e.Cancel = true;
+                this.Hide();
+                return;
+            }
+
             if(_mfvm.VrRunning)
             {
                 if (MessageBox.Show("VR is currently running. Are you sure you want to close VRSuspender ? (Process will be restored to their initial state)", "Warning", AdonisUI.Controls.MessageBoxButton.YesNo, AdonisUI.Controls.MessageBoxImage.Warning) == AdonisUI.Controls.MessageBoxResult.No)
@@ -63,8 +71,19 @@ namespace VRSuspender
 
         public void MnuNIQuit_Click(object sender, RoutedEventArgs e)
         {
+            _closingFromMenu = true;
             Close();
         }
 
+        private void AdonisWindow_StateChanged(object sender, EventArgs e)
+        {
+            if(WindowState == WindowState.Minimized)
+            {
+                if(Properties.Settings.Default.MinimizeToTray)
+                {
+                    this.Hide();
+                }
+            }
+        }
     }
 }

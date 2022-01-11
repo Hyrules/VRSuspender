@@ -37,6 +37,8 @@ namespace VRSuspender
         private bool _startWithWindows;
         private bool _startMonitoringOnStartup;
         private uint _startState;
+        private bool _minimizeToTray;
+        private bool _closeToTray;
         private CollectionView _view;
         private bool _vrRunning = false;
 
@@ -46,6 +48,8 @@ namespace VRSuspender
             StartMonitoringOnStartup = Properties.Settings.Default.StartMonitorOnStartup;
             StartState = Properties.Settings.Default.StartState;
             StartWithWindows = Properties.Settings.Default.StartWithWindows;
+            MinimizeToTray = Properties.Settings.Default.MinimizeToTray;
+            CloseToTray = Properties.Settings.Default.CloseToTray;
 
             _listWatchedProcess.Add("vrserver.exe");
             _listTrackedProcess = new ObservableCollection<TrackedProcess>();
@@ -426,6 +430,8 @@ namespace VRSuspender
             Properties.Settings.Default.StartState = StartState;
             Properties.Settings.Default.StartWithWindows = StartWithWindows;
             Properties.Settings.Default.StartMonitorOnStartup = StartMonitoringOnStartup;
+            Properties.Settings.Default.MinimizeToTray = MinimizeToTray;
+            Properties.Settings.Default.CloseToTray = MinimizeToTray;
             Properties.Settings.Default.Save();
 
         }
@@ -578,6 +584,8 @@ namespace VRSuspender
         public bool IsMonitoring { get => _isMonitoring; set => SetProperty(ref _isMonitoring,value); }
         public uint StartState { get => _startState; set => SetProperty(ref _startState,value); }
         public bool VrRunning { get => _vrRunning; private set => SetProperty(ref _vrRunning,value); }
+        public bool MinimizeToTray { get => _minimizeToTray; set => SetProperty(ref _minimizeToTray,value); }
+        public bool CloseToTray { get => _closeToTray; set => SetProperty(ref _closeToTray,value); }
         #endregion
     }
 

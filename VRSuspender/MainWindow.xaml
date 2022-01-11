@@ -10,7 +10,7 @@
         xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
         xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
         mc:Ignorable="d"
-        Title="VR Suspender" Height="450" Width="800" ContentRendered="Window_ContentRendered" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="CanResize" IconVisibility="Visible" TitleVisibility="Visible" Background="#FF2A2B34" >
+        Title="VR Suspender" Height="450" Width="800" ContentRendered="Window_ContentRendered" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="CanResize" IconVisibility="Visible" TitleVisibility="Visible" Background="#FF2A2B34" StateChanged="AdonisWindow_StateChanged" >
     <adonisControls:AdonisWindow.Resources>
         <Style x:Key="{x:Static ToolBar.ComboBoxStyleKey}" TargetType="{x:Type ComboBox}" BasedOn="{StaticResource {x:Type ComboBox}}" />
          <SolidColorBrush Color="#FFCFCFCF" x:Key="VRSuspenderToolBarButtons"/>
@@ -63,12 +63,10 @@
                     <ComboBoxItem Content="Start Maximized"/>
                     <ComboBoxItem Content="Start to tray"/>
                 </ComboBox>
-                <MenuItem Name="nmuStartWithWindows" Header="Start with Windows" IsCheckable="True" IsChecked="{Binding StartWithWindows}" Command="{Binding StarWithWindowsCommand}">
-
-                </MenuItem>
-                <MenuItem Name="mntStartMonitorOnStartup" Header="Start monitoring on startup" IsCheckable="True" IsChecked="{Binding StartMonitoringOnStartup}" Command="{Binding SaveSettingsCommand}">
-
-                </MenuItem>
+                <MenuItem Header="Close to tray" IsCheckable="True" IsChecked="{Binding CloseToTray}" Command="{Binding SaveSettingsCommand}"/>
+                <MenuItem Header="Minimize to tray" IsCheckable="True" IsChecked="{Binding MinimizeToTray}" Command="{Binding SaveSettingsCommand}"/>
+                <MenuItem Name="nmuStartWithWindows" Header="Start with Windows" IsCheckable="True" IsChecked="{Binding StartWithWindows}" Command="{Binding StarWithWindowsCommand}"/>
+                <MenuItem Name="mntStartMonitorOnStartup" Header="Start monitoring on startup" IsCheckable="True" IsChecked="{Binding StartMonitoringOnStartup}" Command="{Binding SaveSettingsCommand}"/>
             </MenuItem>
             <MenuItem Name="mnuHelp" Header="Help">
                 <MenuItem Header="VR Suspender GitHub website" Command="{Binding OpenVRSuspenderWebsiteCommand}"/>
