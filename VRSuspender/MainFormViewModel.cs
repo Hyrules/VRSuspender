@@ -431,7 +431,7 @@ namespace VRSuspender
             Properties.Settings.Default.StartWithWindows = StartWithWindows;
             Properties.Settings.Default.StartMonitorOnStartup = StartMonitoringOnStartup;
             Properties.Settings.Default.MinimizeToTray = MinimizeToTray;
-            Properties.Settings.Default.CloseToTray = MinimizeToTray;
+            Properties.Settings.Default.CloseToTray = CloseToTray;
             Properties.Settings.Default.Save();
 
         }
