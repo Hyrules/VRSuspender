@@ -440,7 +440,15 @@ namespace VRSuspender
             CollectionViewSource.GetDefaultView(_view).Refresh();
         }
 
-        public static ICommand NotificationIconDoubleClickCommand => new RelayCommand(param => Application.Current.MainWindow.Show());
+        public static ICommand NotificationIconDoubleClickCommand => new RelayCommand(param => NotifyDoubleClick());
+
+        private static void NotifyDoubleClick()
+        {
+            
+            Application.Current.MainWindow.Show();
+            Application.Current.MainWindow.WindowState = WindowState.Normal;
+        }
+
 
         private bool FilterMainViewProcessState(object process)
         {

@@ -91,5 +91,7 @@ namespace VRSuspender
         {
             await _mfvm.Initialize();
         }
+
+ 
     }
 }
