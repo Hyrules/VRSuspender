@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 using System.Windows;
@@ -15,6 +16,8 @@ namespace VRSuspender
     /// </summary>
     public partial class App : Application
     {
+        private static Mutex _mutex = null;
+
         public App()
         {
            
@@ -22,7 +25,19 @@ namespace VRSuspender
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            
+
+            const string appName = "VRSuspender";
+            bool createdNew;
+
+            _mutex = new Mutex(true, appName, out createdNew);
+
+            if (!createdNew)
+            {
+                //app is already running! Exiting the application  
+                AdonisUI.Controls.MessageBox.Show("Only one instance of VRSuspender is possible at a time.","Error", AdonisUI.Controls.MessageBoxButton.OK, AdonisUI.Controls.MessageBoxImage.Error);
+                return;
+            }
+
             MainWindow wnd = new();
 
             switch (VRSuspender.Properties.Settings.Default.StartState)
