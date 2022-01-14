@@ -40,12 +40,42 @@
     </adonisControls:AdonisWindow.DataContext>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="24"/>
-            <RowDefinition Height="42"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="5"/>
-            <RowDefinition Height="*" MinHeight="100" MaxHeight="250"/>
-            <RowDefinition Height="22"/>
+            <RowDefinition Name="RD_Menu" Height="24"/>
+            <RowDefinition Name="RD_ToolBar" Height="42"/>
+            <RowDefinition Name="RD_ProcessList" Height="*"/>
+            <RowDefinition Name="RD_GridSplitter">
+                <RowDefinition.Style>
+                    <Style TargetType="RowDefinition">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding LogVisible}" Value="False">
+                                <Setter Property="Height" Value="0"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding LogVisible}" Value="True">
+                                <Setter Property="Height" Value="5"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </RowDefinition.Style>
+            </RowDefinition>
+            <RowDefinition Name="RD_Log" >
+                <RowDefinition.Style>
+                    <Style TargetType="RowDefinition">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding LogVisible}" Value="False">
+                                <Setter Property="MaxHeight" Value="0"/>
+                                <Setter Property="MinHeight" Value="0"/>
+                                <Setter Property="Height" Value="0"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding LogVisible}" Value="True">
+                                <Setter Property="MaxHeight" Value="250"/>
+                                <Setter Property="MinHeight" Value="100"/>
+                                <Setter Property="Height" Value="*"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </RowDefinition.Style>
+            </RowDefinition>
+            <RowDefinition Name="RD_StatusBar" Height="22"/>
         </Grid.RowDefinitions>
         <h:TaskbarIcon Name="NotifyIcon" IconSource="/icon.ico" DoubleClickCommand="{Binding NotificationIconDoubleClickCommand}" Visibility="Visible" ToolTip="VR Suspender" ContextMenu="{StaticResource NotifyIconMenu}"/>
         <Menu Height="24" VerticalAlignment="Top" Grid.Row="0" FontSize="13">
@@ -68,6 +98,8 @@
                 <MenuItem Header="Minimize to tray" IsCheckable="True" IsChecked="{Binding MinimizeToTray}" Command="{Binding SaveSettingsCommand}"/>
                 <MenuItem Name="nmuStartWithWindows" Header="Start with Windows" IsCheckable="True" IsChecked="{Binding StartWithWindows}" Command="{Binding StarWithWindowsCommand}"/>
                 <MenuItem Name="mntStartMonitorOnStartup" Header="Start monitoring on startup" IsCheckable="True" IsChecked="{Binding StartMonitoringOnStartup}" Command="{Binding SaveSettingsCommand}"/>
+                <Separator/>
+                <MenuItem Header="Log Visible" IsCheckable="True" IsChecked="{Binding LogVisible}" Command="{Binding SaveSettingsCommand}"/>
             </MenuItem>
             <MenuItem Name="mnuHelp" Header="Help">
                 <MenuItem Header="VR Suspender GitHub website" Command="{Binding OpenVRSuspenderWebsiteCommand}"/>

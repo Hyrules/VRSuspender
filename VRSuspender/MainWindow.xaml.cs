@@ -34,6 +34,8 @@ namespace VRSuspender
             _mfvm = DataContext as MainFormViewModel;
             _mfvm.SetCollectionViewItemSource(lvTrackedProcess.ItemsSource);
             _closingFromMenu = false;
+
+            //var baseuri = BaseUriHelper.GetBaseUri(this);
         }
 
         private void Window_ContentRendered(object sender, EventArgs e)

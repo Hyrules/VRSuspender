@@ -22,6 +22,8 @@ using System.Windows.Data;
 using Microsoft.Win32;
 using Windows.Storage;
 using VRSuspender.Objects;
+using IWshRuntimeLibrary;
+using System.Windows.Navigation;
 
 namespace VRSuspender
 {
@@ -53,11 +55,14 @@ namespace VRSuspender
             StartWithWindows = Properties.Settings.Default.StartWithWindows;
             MinimizeToTray = Properties.Settings.Default.MinimizeToTray;
             CloseToTray = Properties.Settings.Default.CloseToTray;
+            LogVisible = Properties.Settings.Default.LogVisible;
 
             _listWatchedProcess.Add("vrserver.exe");
             _listTrackedProcess = new ObservableCollection<TrackedProcess>();
             LoadTrackedProcessProfiles();
             IsMonitoring = false;
+
+            
         }
        
         public async Task Initialize()
@@ -242,7 +247,7 @@ namespace VRSuspender
                     }
                     catch (Exception)
                     {
-                        process.Icon = new BitmapImage(new Uri("/Resources/qm.png"));
+                        process.Icon = new BitmapImage(new Uri(@"pack://application:,,,/VRSuspender;component/Resources/qm.png"));
                     }
 
                     if (p[0].Threads[0].ThreadState == ThreadState.Wait)
@@ -264,13 +269,13 @@ namespace VRSuspender
                 }
                 else
                 {
-                    if (!string.IsNullOrEmpty(process.Path) && File.Exists(process.Path))
+                    if (!string.IsNullOrEmpty(process.Path) && System.IO.File.Exists(process.Path))
                     {
                         process.Icon = Icon.ExtractAssociatedIcon(process.Path).ToImageSource();
                     }
                     else
                     {
-                        process.Icon = new BitmapImage(new Uri("/Resources/qm.png"));
+                        process.Icon = new BitmapImage(new Uri(@"pack://application:,,,/VRSuspender;component/Resources/qm.png"));
                         process.Status = ProcessState.NotFound;
 
                     }
@@ -357,7 +362,6 @@ namespace VRSuspender
         public ICommand FilterMainViewCommand => new RelayCommand(param => RefreshFilter());
         public static ICommand OpenVRSuspenderWebsiteCommand => new RelayCommand(param => OpenVRSuspenderWebsite());
         public ICommand StarWithWindowsCommand => new RelayCommand(param => SetStartWithWindows(StartWithWindows));
-
         public ICommand AutoDetectProcessCommand => new AsyncRelayCommand(param => AutoDetectProcess(), param => CanAutoDetectProcess());
 
         private bool CanAutoDetectProcess()
@@ -372,7 +376,7 @@ namespace VRSuspender
                 foreach (TrackedProcess profile in ProfileDBManager.ListProfiles)
                 {
                     WriteToLog($"Looking for profile {profile.ProfileName}...");
-                    if (File.Exists(profile.Path))
+                    if (System.IO.File.Exists(profile.Path))
                     {
                         
                         if (!ListTrackedProcess.Any(x => x.ProfileName == profile.ProfileName && x.ProcessName == profile.ProcessName))
@@ -482,12 +486,61 @@ namespace VRSuspender
             Properties.Settings.Default.StartMonitorOnStartup = StartMonitoringOnStartup;
             Properties.Settings.Default.MinimizeToTray = MinimizeToTray;
             Properties.Settings.Default.CloseToTray = CloseToTray;
+            Properties.Settings.Default.LogVisible = LogVisible;
             Properties.Settings.Default.Save();
 
         }
 
         private void SetStartWithWindows(bool start)
         {
+            string startup = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+            string lnk = Path.Combine(startup, "VRSuspender.lnk");
+
+            if(start)
+            {
+                if(!System.IO.File.Exists(lnk))
+                {
+                    WshShell shell = new();
+                    IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(lnk);
+
+                    shortcut.Description = "VR Suspender";
+                    shortcut.TargetPath = Environment.ProcessPath;
+                    shortcut.WorkingDirectory = Path.GetFullPath(Environment.ProcessPath);
+                    shortcut.Save();
+                    WriteToLog("VRSuspender will start with windows.");
+                }
+                else
+                {
+                    WriteToLog("Shortcut already exists. Skipping creation.");
+                }
+            }
+            else
+            {
+                try
+                {
+                    System.IO.File.Delete(lnk);
+                    WriteToLog("VRSuspender has been removed from Windows startup applications.");
+                }
+                catch(DirectoryNotFoundException)
+                {
+                    WriteToLog("Unable to delete Shortcut. Folder not found.");
+                }
+                catch(FileNotFoundException)
+                {
+                    WriteToLog("Unable to delete Shortcut. Shortcut not found.");
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    WriteToLog("Unable to delete Shortcut. Permission denied.");
+                }
+                catch (Exception ex)
+                {
+                    WriteToLog($"Unable to delete Shortcut. {ex.Message}");
+                }
+            }
+
+            
+            /*
             RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
             if (start)
@@ -508,7 +561,7 @@ namespace VRSuspender
             {
                 WriteToLog("VRSuspender has been removed from Windows startup applications.");
                 rkApp.DeleteValue("VRSuspender", false);
-            }
+            }*/
             SaveSettings();
         }
 

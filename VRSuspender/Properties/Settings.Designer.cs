@@ -94,5 +94,17 @@ namespace VRSuspender.Properties {
                 this["CloseToTray"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LogVisible {
+            get {
+                return ((bool)(this["LogVisible"]));
+            }
+            set {
+                this["LogVisible"] = value;
+            }
+        }
     }
 }
