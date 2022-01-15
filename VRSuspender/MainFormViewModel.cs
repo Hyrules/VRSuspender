@@ -22,8 +22,9 @@ using System.Windows.Data;
 using Microsoft.Win32;
 using Windows.Storage;
 using VRSuspender.Objects;
-using IWshRuntimeLibrary;
 using System.Windows.Navigation;
+using Microsoft.Win32.TaskScheduler;
+using System.Security.Principal;
 
 namespace VRSuspender
 {
@@ -65,7 +66,7 @@ namespace VRSuspender
             
         }
        
-        public async Task Initialize()
+        public async System.Threading.Tasks.Task Initialize()
         {
             await RefreshProcess();
         }
@@ -152,7 +153,7 @@ namespace VRSuspender
             await ApplyStopVRActionToProcess();
 
         }
-        public async Task ApplyStopVRActionToProcess()
+        public async System.Threading.Tasks.Task ApplyStopVRActionToProcess()
         {
             if(!VrRunning) return;
             await RefreshProcess();
@@ -234,9 +235,9 @@ namespace VRSuspender
             }
         }
 
-        private static async Task RefreshProcess(TrackedProcess process)
+        private static async System.Threading.Tasks.Task RefreshProcess(TrackedProcess process)
         {
-            await Task.Run(() =>
+            await System.Threading.Tasks.Task.Run(() =>
             {
                 Process[] p = Process.GetProcessesByName(process.ProcessName);
                 if (p.Length > 0)
@@ -283,7 +284,7 @@ namespace VRSuspender
             });
         }
 
-        private async Task RefreshProcess()
+        private async System.Threading.Tasks.Task RefreshProcess()
         {
             foreach (TrackedProcess process in _listTrackedProcess)
             {
@@ -369,9 +370,9 @@ namespace VRSuspender
             return VrRunning == false;
         }
 
-        private async Task AutoDetectProcess()
+        private async System.Threading.Tasks.Task AutoDetectProcess()
         {
-            await Task.Run(() =>
+            await System.Threading.Tasks.Task.Run(() =>
             {
                 foreach (TrackedProcess profile in ProfileDBManager.ListProfiles)
                 {
@@ -493,79 +494,37 @@ namespace VRSuspender
 
         private void SetStartWithWindows(bool start)
         {
-            string startup = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
-            string lnk = Path.Combine(startup, "VRSuspender.lnk");
 
-            if(start)
-            {
-                if(!System.IO.File.Exists(lnk))
-                {
-                    WshShell shell = new();
-                    IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(lnk);
-
-                    shortcut.Description = "VR Suspender";
-                    shortcut.TargetPath = Environment.ProcessPath;
-                    shortcut.WorkingDirectory = Path.GetFullPath(Environment.ProcessPath);
-                    shortcut.Save();
-                    WriteToLog("VRSuspender will start with windows.");
-                }
-                else
-                {
-                    WriteToLog("Shortcut already exists. Skipping creation.");
-                }
-            }
-            else
-            {
-                try
-                {
-                    System.IO.File.Delete(lnk);
-                    WriteToLog("VRSuspender has been removed from Windows startup applications.");
-                }
-                catch(DirectoryNotFoundException)
-                {
-                    WriteToLog("Unable to delete Shortcut. Folder not found.");
-                }
-                catch(FileNotFoundException)
-                {
-                    WriteToLog("Unable to delete Shortcut. Shortcut not found.");
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    WriteToLog("Unable to delete Shortcut. Permission denied.");
-                }
-                catch (Exception ex)
-                {
-                    WriteToLog($"Unable to delete Shortcut. {ex.Message}");
-                }
-            }
-
-            
-            /*
-            RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-
+            using TaskService ts = new();
             if (start)
-            {            
-                if (rkApp.GetValue("VRSuspender") == null)
+            {
+
+                if (!ts.RootFolder.Tasks.Any(t => t.Name == "VRSuspender"))
                 {
+                    TaskDefinition td = ts.NewTask();
+                    td.RegistrationInfo.Description = "Start VR Suspender with windows.";
+                    td.Principal.RunLevel = TaskRunLevel.Highest;
+                    td.Triggers.Add(new LogonTrigger() { Enabled = true, UserId = WindowsIdentity.GetCurrent().Name });
+                    td.Actions.Add(new ExecAction(Environment.ProcessPath, null, Path.GetDirectoryName(Environment.ProcessPath)));
+                    ts.RootFolder.RegisterTaskDefinition(@"VRSuspender", td);
                     WriteToLog("VRSuspender will start with windows.");
-                    string exe = $"\"{Environment.ProcessPath}\"";
-                    rkApp.SetValue("VRSuspender", exe);
                 }
                 else
                 {
-                    WriteToLog("VR Suspender is already set to start with Windows.");
+                    WriteToLog("Scheduled Task already exists. Skipping creation.");
                 }
-
             }
             else
             {
-                WriteToLog("VRSuspender has been removed from Windows startup applications.");
-                rkApp.DeleteValue("VRSuspender", false);
-            }*/
+                
+                ts.RootFolder.DeleteTask(@"VRSuspender", false);
+            }
             SaveSettings();
+           
+
         }
 
-        private async Task AddProces()
+        private async System.Threading.Tasks.Task AddProces()
         {
             EditTrackedProcessForm ProcessEditor = new()
             {
@@ -672,7 +631,7 @@ namespace VRSuspender
 
         private void WriteToLog(string message)
         {
-            Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+            Application.Current.Dispatcher.BeginInvoke(new System.Action(() => {
                 string msg = $"[{DateTime.Now}] - {message}.";
                 Log.Insert(0, msg);
                 LastLogMessage = msg;
