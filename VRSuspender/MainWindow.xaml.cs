@@ -36,12 +36,14 @@ namespace VRSuspender
             _closingFromMenu = false;
 
             //var baseuri = BaseUriHelper.GetBaseUri(this);
+
+            if (Properties.Settings.Default.StartMonitorOnStartup)
+                _mfvm.StartMonitoring();
         }
 
         private void Window_ContentRendered(object sender, EventArgs e)
         {
-            if(Properties.Settings.Default.StartMonitorOnStartup)
-                _mfvm.StartMonitoring();
+
 
         }
 

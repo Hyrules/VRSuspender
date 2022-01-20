@@ -22,5 +22,17 @@
     "processname": "SamsungMagician",
     "action": "Suspend",
     "path": "C:\\Program Files (x86)\\Samsung\\Samsung Magician\\SamsungMagician.exe"
+  },
+  {
+    "profilename":  "Logitech GHUB",
+    "processname": "lghub",
+    "action": "Suspend",
+    "path": "C:\\Program Files\\LGHUB\\lghub.exe"
+  },
+  {
+    "profilename":  "Logitech GHUB Agent",
+    "processname": "lghub",
+    "action": "Suspend",
+    "path": "C:\\Program Files\\LGHUB\\lghub_agent.exe"
   }
 ]

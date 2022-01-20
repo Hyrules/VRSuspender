@@ -10,7 +10,7 @@
         xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
         xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
         mc:Ignorable="d"
-        Title="VR Suspender" Height="450" Width="800" ContentRendered="Window_ContentRendered" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="CanResize" IconVisibility="Visible" TitleVisibility="Visible" Background="#FF2A2B34" StateChanged="AdonisWindow_StateChanged" Loaded="AdonisWindow_Loaded" >
+        Title="VR Suspender" Height="450" Width="800" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="CanResize" IconVisibility="Visible" TitleVisibility="Visible" Background="#FF2A2B34" StateChanged="AdonisWindow_StateChanged" Loaded="AdonisWindow_Loaded" >
     <adonisControls:AdonisWindow.Resources>
         <Style x:Key="{x:Static ToolBar.ComboBoxStyleKey}" TargetType="{x:Type ComboBox}" BasedOn="{StaticResource {x:Type ComboBox}}" />
         <SolidColorBrush Color="#FFCFCFCF" x:Key="VRSuspenderToolBarButtons"/>
