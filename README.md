@@ -7,7 +7,15 @@ Suspend / Kill Process that interfere with SteamVR.
 
 Most of the time theses programs are softwares that monitor hardware onboard or control LEDs.
 
-**Already contains a few profiles :**
+=== **Requirements** ===
+
+Microsoft .Net 6.0 Desktop Runtimes
+
+Download the Run Desktop Apps (I suggest you download both x86 and x64)
+
+https://dotnet.microsoft.com/en-us/download/dotnet/6.0/runtime
+
+=== **Already contains a few profiles** ===
 
 iCue, EK-Connect, msedge, SamsungMagician.
 
