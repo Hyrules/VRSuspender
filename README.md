@@ -45,7 +45,15 @@ You can either Suspend, Kill or keep Running the process.
 
 Note: If you suspend a process with this app you won't be able to resume it from the task manager. There is no way in the task manager to suspend or resume process that has been suspended.
 
-**WARNING:**
-I do not offer any kind of warranty with this app and user is solely responsible for using the application and situations that might arise.
-I will not be responsible if you crash your computer or someone else because you killed or suspended a process you shouldn't have.
-Make sure to investigate the processes before suspending or killing them.
+Licence :
+
+Creative Commons Attribution Non-Commercial License V2.0
+
+The creator of this projet cannot be held responsible for any problem that might arise for the use of the software.
+
+You are free to:
+
+Share — copy and redistribute the material in any medium or format
+Adapt — remix, transform, and build upon the material 
+
+http://creativecommons.org/licenses/by-nc/2.0/ca/
