@@ -4,6 +4,8 @@
 
 Suspend / Kill Process that interfere with SteamVR. 
 
+***
+
 Most of the time theses programs are softwares that monitor hardware onboard or control LEDs.
 
 <b> Requirements </b>
@@ -28,7 +30,7 @@ Automatically detect SteamVR (vrmonitor.exe) and suspend/kill process that cause
 
 <b> How to use : </b>
 
-1. Download the latest release 
+1. Download the [latest release](https://github.com/Hyrules/VRSuspender/releases/latest)
 2. Start this application
 3. Start monitoring for SteamVR 
 4. Start SteamVR. 
